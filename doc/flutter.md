@@ -1,8 +1,16 @@
 # flutter
 
-## build
+## 打包和安装
 
+`flutter build appbundle`
 `flutter build apk --split-per-abi`
+`flutter install --use-application-binary=build/app/outputs/flutter-apk/app-arm64-v8a-release.apk`
+
+查看手机cpu架构：（需要手机开启usb调试）
+`adb shell getprop | grep cpu`
+
+注：不要像flutter文档中提到的，直接使用`flutter install`，这会导致下载成flutter默认的演示项目，
+实际安装时应指明下载的软件包（或者在打包的时候不区分不同的cpu架构、把几种包打在一起）
 
 ## widget的状态
 

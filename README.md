@@ -1,16 +1,15 @@
 # totp
 
-an Android app implements RFC 6238, can be used for github login.
+一个符合RFC 6238标准的TOTP密码计算应用（可以用于github 2fa登录验证）
 
-## Getting Started
+## 设计图
 
-This project is a starting point for a Flutter application.
+![设计图](doc/totp_design.png)
 
-A few resources to get you started if this is your first Flutter project:
+## 使用
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+todo
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 技术
+
+todo

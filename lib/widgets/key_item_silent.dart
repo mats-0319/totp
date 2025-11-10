@@ -81,7 +81,7 @@ class _KeyDetails extends StatelessWidget {
         onPressed: () async {
           await _openModifyDialog(context);
         },
-        child: Text(keyIns.name, textScaler: TextScaler.linear(2)),
+        child: Text(keyIns.name, textScaler: TextScaler.linear(1.8)),
       ),
     );
   }

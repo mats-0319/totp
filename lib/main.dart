@@ -6,12 +6,23 @@ import 'home.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await TOTPKeyList().create(TOTPKey("HFLEOZBUOVKXMVRY", "name1", false)); // todo: for test
-  await TOTPKeyList().create(TOTPKey("MVIHMVLNMI3EMVTW", "name2", true)); // todo: for test
-  await TOTPKeyList().create(TOTPKey.all("key3", "name3", false, true)); // todo: for test
   await TOTPKeyList().initialize();
+  await _addDemoKeyIns();
 
   runApp(const App());
+}
+
+Future<void> _addDemoKeyIns() async {
+  bool hasValidItemFlag = false;
+  for (var i = 0; i < TOTPKeyList().list.length; i++) {
+    if (!TOTPKeyList().list[i].isDeleted) {
+      hasValidItemFlag = true;
+      break;
+    }
+  }
+  if (hasValidItemFlag) {
+    await TOTPKeyList().create(TOTPKey("HFLEOZBUOVKXMVRY", "demo", false));
+  }
 }
 
 class App extends StatelessWidget {
@@ -22,7 +33,7 @@ class App extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => TOTPKeyList(),
       child: MaterialApp(
-        title: 'TOTP App',
+        title: "TOTP",
         theme: ThemeData(
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),

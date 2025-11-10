@@ -72,15 +72,3 @@ class TOTPKeyList extends ChangeNotifier {
     return index;
   }
 }
-
-(String, double) generateTOTP(String key) {
-  return (
-    OTP.generateTOTPCodeString(
-      key,
-      DateTime.now().millisecondsSinceEpoch,
-      algorithm: Algorithm.SHA1,
-      isGoogle: true,
-    ),
-    OTP.remainingSeconds().toDouble(),
-  );
-}

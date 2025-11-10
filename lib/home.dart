@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:totp/about.dart';
+import 'package:totp/widgets/transition_builder.dart';
 import 'package:totp/model/totp_key.dart';
-import 'package:totp/widgets/home_to_about_icon.dart';
 import 'package:totp/widgets/key_item.dart';
 import 'package:totp/widgets/key_item_empty.dart';
 
@@ -24,7 +25,7 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         leading: SizedBox.shrink(),
         title: Center(child: Text("TOTP")),
-        actions: [HomeToAboutIcon()],
+        actions: [_ToAboutIcon()],
       ),
       body: Center(
         child: Column(
@@ -33,6 +34,27 @@ class _HomePageState extends State<HomePage> {
             Expanded(child: ListView(children: displayKeyList(dataState.list))),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ToAboutIcon extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return IconTheme(
+      data: IconThemeData(size: 28),
+      child: IconButton(
+        onPressed: () {
+          Navigator.of(context).push(
+            PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  const AboutPage(),
+              transitionsBuilder: transition,
+            ),
+          );
+        },
+        icon: Icon(Icons.apps),
       ),
     );
   }

@@ -1,7 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:totp/model/totp_key_list.dart';
+import 'package:totp/dart/totp.dart';
+
 import '../model/totp_key.dart';
 
 class ActiveKeyItem extends StatelessWidget {
