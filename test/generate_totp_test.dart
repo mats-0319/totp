@@ -4,18 +4,17 @@ import "package:totp/dart/totp.dart";
 
 void main() {
   test("Test generate totp.", () async {
-    print(
+    final String key = "JBSWY3DPEHPK3PXP";
+    var (totp, _) = generateTOTP(key);
+
+    expect(
+      totp,
       OTP.generateTOTPCodeString(
-        "JBSWY3DPEHPK3PXP",
+        key,
         DateTime.now().millisecondsSinceEpoch,
         algorithm: Algorithm.SHA1,
         isGoogle: true,
       ),
     );
-    print(OTP.remainingSeconds());
-  });
-
-  test("Test generate totp.", () {
-    print(generateTOTP("JBSWY3DPEHPK3PXP"));
   });
 }

@@ -1,7 +1,9 @@
-import 'package:otp/otp.dart';
-import 'package:totp/model/totp_key.dart';
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:totp/model/totp_key_storage.dart';
+import 'package:path_provider/path_provider.dart';
+
+import 'totp_key.dart';
 
 class TOTPKeyList extends ChangeNotifier {
   // 为了保证使用`TOTPKeyList()`可以调用到同一实例，以及watch的时候能正确监听到实例的变化
@@ -16,30 +18,35 @@ class TOTPKeyList extends ChangeNotifier {
   List<TOTPKey> list = [];
 
   Future<void> initialize() async {
-    list = await TOTPKeyStorage().read();
+    list = await read();
   }
 
-  Future<void> create(TOTPKey key) async {
-    int index = _getIndex(key.key);
+  Future<void> create(TOTPKey keyIns) async {
+    int index = _getIndex(keyIns.key);
     if (index >= 0) {
-      return; // 'key' already exist
+      if (!keyIns.isDeleted) {
+        return; // 'key' already exist
+      }
+
+      // if re-create an exist and deleted instance, recover it. (for demo key)
+      keyIns.isDeleted = false;
+    } else {
+      list.add(keyIns);
     }
 
-    list.add(key);
-
-    await TOTPKeyStorage().write(list);
+    await write(list);
     notifyListeners();
   }
 
-  Future<void> update(TOTPKey key) async {
-    int index = _getIndex(key.key);
+  Future<void> update(TOTPKey keyIns) async {
+    int index = _getIndex(keyIns.key);
     if (index < 0) {
       return; // target 'key' not exist
     }
 
-    list[index] = key;
+    list[index] = keyIns;
 
-    await TOTPKeyStorage().write(list);
+    await write(list);
     notifyListeners();
   }
 
@@ -51,7 +58,7 @@ class TOTPKeyList extends ChangeNotifier {
 
     list[index].isDeleted = true;
 
-    await TOTPKeyStorage().write(list);
+    await write(list);
     notifyListeners();
   }
 
@@ -71,4 +78,40 @@ class TOTPKeyList extends ChangeNotifier {
 
     return index;
   }
+}
+
+Future<List<TOTPKey>> read([bool? isTestMod]) async {
+  List<TOTPKey> listIns = [];
+  String fileStr = "";
+
+  try {
+    File fileIns = await _openFile(isTestMod);
+    fileStr = await fileIns.readAsString();
+  } catch (err) {
+    return listIns;
+  }
+
+  for (var value in jsonDecode(fileStr)) {
+    listIns.add(TOTPKey.fromJson(value));
+  }
+
+  return listIns;
+}
+
+Future<void> write(List<TOTPKey> list, [bool? isTestMod]) async {
+  File fileIns = await _openFile(isTestMod);
+  await fileIns.writeAsString(jsonEncode(list));
+}
+
+Future<File> _openFile([bool? isTestMod]) async {
+  String keyFile = "totp_key.json";
+
+  if (isTestMod != null && isTestMod) {
+    return File("./$keyFile");
+  }
+
+  final directory = await getApplicationDocumentsDirectory();
+  final path = directory.path;
+
+  return File("$path/$keyFile");
 }

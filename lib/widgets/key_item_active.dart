@@ -1,8 +1,7 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:totp/dart/totp.dart';
 
+import '../dart/totp.dart';
 import '../model/totp_key.dart';
 
 class ActiveKeyItem extends StatelessWidget {
@@ -23,7 +22,7 @@ class ActiveKeyItem extends StatelessWidget {
         borderRadius: BorderRadiusGeometry.circular(20),
       ),
       height: 300,
-      child: Container(
+      child: Padding(
         padding: EdgeInsets.all(20),
         child: Column(
           children: [
@@ -39,7 +38,7 @@ class ActiveKeyItem extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 40,),
+            SizedBox(height: 40),
             _TimeBasedProgress(keyStr: keyIns.key),
           ],
         ),

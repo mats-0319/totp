@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:totp/widgets/transition_builder.dart';
-import 'package:totp/doc.dart';
-import 'package:totp/widgets/app_bar_subpages.dart';
+
+import 'doc.dart';
+import 'widgets/subpages_app_bar.dart';
+import 'widgets/transition_builder.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});

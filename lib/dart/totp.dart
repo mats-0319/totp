@@ -1,42 +1,43 @@
 import 'dart:typed_data';
 import 'dart:math';
-
 import 'package:base32/base32.dart';
 import 'package:crypto/crypto.dart';
 
-(String, double) generateTOTP(String key) {
+const int _timeInterval = 30;
+const int _pwdLength = 6;
+
+(String, double) generateTOTP(String keyBase32) {
   try {
-    Uint8List keyBytes = Uint8List.fromList(base32.decode(key.toUpperCase()));
+    final Uint8List keyBytes = Uint8List.fromList(base32.decode(keyBase32));
 
-    int timeNowSecond = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-    int timeCount = timeNowSecond ~/ 30;
-    int timeRemain = 30 - timeNowSecond % 30; // use in return
-    Uint8List timeCountBytes = _int2bytes(timeCount);
+    final int timestampSecond = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    final int timeRemain = _timeInterval - timestampSecond % _timeInterval;
+    final int timeCount = timestampSecond ~/ _timeInterval;
+    final Uint8List timeCountBytes = _int2Bytes(timeCount);
 
-    Digest hash = Hmac(sha1, keyBytes).convert(timeCountBytes);
+    final List<int> hash = Hmac(sha1, keyBytes).convert(timeCountBytes).bytes;
 
-    int offset = hash.bytes.last & 0xf;
-    int longPassword =
-        (hash.bytes[offset] & 0x7f) << 24 |
-        hash.bytes[offset + 1] << 16 |
-        hash.bytes[offset + 2] << 8 |
-        hash.bytes[offset + 3];
+    final int offset = hash.last & 0xf; // 0b 0000 1111
+    final int longPassword =
+        (hash[offset] & 0x7f) << 24 | // 0b 0111 1111
+        hash[offset + 1] << 16 |
+        hash[offset + 2] << 8 |
+        hash[offset + 3];
 
-    int totp = longPassword % pow(10, 6).toInt();
+    final int totp = longPassword % pow(10, _pwdLength).toInt();
 
-    return (totp.toString().padLeft(6, "0"), timeRemain.toDouble());
+    return (totp.toString().padLeft(_pwdLength, "0"), timeRemain.toDouble());
   } catch (e) {
-    return ("", 0.0);
+    return ("计算密码失败", _timeInterval.toDouble());
   }
 }
 
-Uint8List _int2bytes(int long) {
+Uint8List _int2Bytes(int long) {
   final byteArray = Uint8List(8);
 
   for (var index = byteArray.length - 1; index >= 0; index--) {
-    final byte = long & 0xff;
-    byteArray[index] = byte;
-    long = (long - byte) ~/ 256;
+    byteArray[index] = long & 0xff;
+    long >>= 8;
   }
 
   return byteArray;

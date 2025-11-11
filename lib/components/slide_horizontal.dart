@@ -89,8 +89,9 @@ class _Slide extends State<Slide> with TickerProviderStateMixin {
   }
 
   void open() {
-    if (translateX != -widget.actionsWidth)
+    if (translateX != -widget.actionsWidth) {
       animationController.animateTo(-widget.actionsWidth);
+    }
   }
 
   void close() {

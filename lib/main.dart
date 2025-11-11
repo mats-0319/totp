@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:totp/model/totp_key_list.dart';
-import 'package:totp/model/totp_key.dart';
+
 import 'home.dart';
+import 'model/totp_key.dart';
+import 'model/totp_key_list.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,7 +21,7 @@ Future<void> _addDemoKeyIns() async {
       break;
     }
   }
-  if (hasValidItemFlag) {
+  if (!hasValidItemFlag) {
     await TOTPKeyList().create(TOTPKey("HFLEOZBUOVKXMVRY", "demo", false));
   }
 }

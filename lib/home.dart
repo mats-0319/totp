@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:totp/about.dart';
-import 'package:totp/widgets/transition_builder.dart';
-import 'package:totp/model/totp_key.dart';
-import 'package:totp/widgets/key_item.dart';
-import 'package:totp/widgets/key_item_empty.dart';
 
+import 'about.dart';
+import 'model/totp_key.dart';
 import 'model/totp_key_list.dart';
+import 'widgets/key_item.dart';
+import 'widgets/key_item_empty.dart';
+import 'widgets/transition_builder.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:totp/model/totp_key_list.dart';
-import 'package:totp/model/totp_key.dart';
+
+import '../model/totp_key.dart';
+import '../model/totp_key_list.dart';
 
 class EmptyKeyItem extends StatelessWidget {
   const EmptyKeyItem({super.key});
@@ -13,7 +14,7 @@ class EmptyKeyItem extends StatelessWidget {
         borderRadius: BorderRadiusGeometry.circular(20),
       ),
       height: 200,
-      child: Container(
+      child: Padding(
         padding: EdgeInsets.all(40),
         child: IconTheme(
           data: IconThemeData(size: 60, opacity: 0.3),
@@ -34,19 +35,19 @@ class EmptyKeyItem extends StatelessWidget {
       builder: (context) {
         return Dialog(
           insetPadding: EdgeInsets.only(left: 20, right: 20),
-          child: _CreateDialogForm(),
+          child: _CreateDialog(),
         );
       },
     );
   }
 }
 
-class _CreateDialogForm extends StatefulWidget {
+class _CreateDialog extends StatefulWidget {
   @override
-  State<_CreateDialogForm> createState() => _CreateDialogFormState();
+  State<_CreateDialog> createState() => _CreateDialogState();
 }
 
-class _CreateDialogFormState extends State<_CreateDialogForm> {
+class _CreateDialogState extends State<_CreateDialog> {
   String key = "";
   String name = "";
   bool needAutoActive = false;
@@ -78,14 +79,13 @@ class _CreateDialogFormState extends State<_CreateDialogForm> {
           Padding(padding: EdgeInsets.all(20), child: Text("创建TOTP密钥实例")),
           Padding(
             padding: EdgeInsets.all(12),
-            child: _KeyInput(onChanged: _onKeyChanged),
+            child: _Input(text: "key", onChanged: _onKeyChanged),
           ),
           Padding(
             padding: EdgeInsets.all(12),
-            child: _NameInput(onChanged: _onNameChanged),
+            child: _Input(text: "密钥名称", onChanged: _onNameChanged),
           ),
-          Container(
-            height: 80,
+          Padding(
             padding: EdgeInsets.only(left: 12, right: 12),
             child: _AutoActiveSwitch(emitStatus: _onAutoActiveChanged),
           ),
@@ -103,37 +103,26 @@ class _CreateDialogFormState extends State<_CreateDialogForm> {
   }
 }
 
-class _KeyInput extends StatelessWidget {
-  const _KeyInput({required this.onChanged});
+class _Input extends StatefulWidget {
+  const _Input({required this.text, required this.onChanged});
 
+  final String text;
   final Function(String) onChanged;
 
   @override
-  Widget build(BuildContext context) {
-    return TextField(
-      onChanged: onChanged,
-      decoration: InputDecoration(
-        border: OutlineInputBorder(),
-        labelText: "key",
-        hintText: "key",
-      ),
-    );
-  }
+  State<_Input> createState() => _InputState();
 }
 
-class _NameInput extends StatelessWidget {
-  const _NameInput({required this.onChanged});
-
-  final Function(String) onChanged;
-
+class _InputState extends State<_Input> {
   @override
   Widget build(BuildContext context) {
     return TextField(
-      onChanged: onChanged,
+      onChanged: widget.onChanged,
       decoration: InputDecoration(
-        border: OutlineInputBorder(),
-        labelText: "密钥名称",
-        hintText: "密钥名称",
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(16)),
+        ),
+        labelText: widget.text,
       ),
     );
   }
@@ -145,21 +134,21 @@ class _AutoActiveSwitch extends StatefulWidget {
   final Function(bool) emitStatus;
 
   @override
-  State<_AutoActiveSwitch> createState() =>
-      _AutoActiveSwitchState(emitStatus: emitStatus);
+  State<_AutoActiveSwitch> createState() => _AutoActiveSwitchState();
 }
 
 class _AutoActiveSwitchState extends State<_AutoActiveSwitch> {
-  _AutoActiveSwitchState({required this.emitStatus});
-
-  final Function(bool) emitStatus;
   bool needAutoActive = false;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(alignment: Alignment.centerLeft, child: Text("是否在启动时自动激活")),
+        Container(
+          alignment: Alignment.centerLeft,
+          margin: EdgeInsets.only(top: 10),
+          child: Text("是否在启动时自动激活"),
+        ),
         Row(
           children: [
             Switch(
@@ -168,7 +157,7 @@ class _AutoActiveSwitchState extends State<_AutoActiveSwitch> {
                 setState(() {
                   needAutoActive = value;
                 });
-                emitStatus(value);
+                widget.emitStatus(value);
               },
             ),
             Text(needAutoActive ? "自动激活" : "不自动激活"),

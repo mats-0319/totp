@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:totp/model/totp_key_list.dart';
-import '../components/slide_horizontal.dart';
+
 import '../model/totp_key.dart';
+import '../model/totp_key_list.dart';
+import '../components/slide_horizontal.dart';
 
 class SilentKeyItem extends StatelessWidget {
   const SilentKeyItem({
@@ -16,7 +17,7 @@ class SilentKeyItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Slide(
-      actions: [_createDelete()],
+      actions: [_DeleteButton(keyStr: keyIns.key)],
       actionsWidth: 100,
       keyStr: Key(""),
       child: Container(
@@ -36,8 +37,15 @@ class SilentKeyItem extends StatelessWidget {
       ),
     );
   }
+}
 
-  _createDelete() {
+class _DeleteButton extends StatelessWidget {
+  const _DeleteButton({required this.keyStr});
+
+  final String keyStr;
+
+  @override
+  Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {},
       child: Container(
@@ -53,7 +61,7 @@ class SilentKeyItem extends StatelessWidget {
         child: TextButton(
           // style: ButtonStyle(),
           onPressed: () async {
-            await TOTPKeyList().delete(keyIns.key);
+            await TOTPKeyList().delete(keyStr);
           },
           child: Text(
             "删除",
@@ -162,7 +170,7 @@ class _ModifyDialogFormState extends State<_ModifyDialogForm> {
             height: 80,
             padding: EdgeInsets.only(left: 12, right: 12),
             child: _AutoActiveSwitch(
-              needAutoActive: widget.keyIns.autoActive,
+              defaultValue: widget.keyIns.autoActive,
               emitStatus: _onAutoActiveChanged,
             ),
           ),
@@ -210,9 +218,12 @@ class _NameInput extends StatelessWidget {
 }
 
 class _AutoActiveSwitch extends StatefulWidget {
-  _AutoActiveSwitch({required this.needAutoActive, required this.emitStatus});
+  const _AutoActiveSwitch({
+    required this.defaultValue,
+    required this.emitStatus,
+  });
 
-  bool needAutoActive;
+  final bool defaultValue;
   final Function(bool) emitStatus;
 
   @override
@@ -220,6 +231,8 @@ class _AutoActiveSwitch extends StatefulWidget {
 }
 
 class _AutoActiveSwitchState extends State<_AutoActiveSwitch> {
+  late bool needAutoActive = widget.defaultValue;
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -228,15 +241,15 @@ class _AutoActiveSwitchState extends State<_AutoActiveSwitch> {
         Row(
           children: [
             Switch(
-              value: widget.needAutoActive,
+              value: needAutoActive,
               onChanged: (value) {
                 setState(() {
-                  widget.needAutoActive = value;
+                  needAutoActive = value;
                 });
                 widget.emitStatus(value);
               },
             ),
-            Text(widget.needAutoActive ? "自动激活" : "不自动激活"),
+            Text(needAutoActive ? "自动激活" : "不自动激活"),
           ],
         ),
       ],
