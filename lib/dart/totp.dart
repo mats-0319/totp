@@ -8,7 +8,7 @@ const int _pwdLength = 6;
 
 (String, double) generateTOTP(String keyBase32) {
   try {
-    final Uint8List keyBytes = Uint8List.fromList(base32.decode(keyBase32));
+    final Uint8List keyBytes = base32.decode(keyBase32.toUpperCase());
 
     final int timestampSecond = DateTime.now().millisecondsSinceEpoch ~/ 1000;
     final int timeRemain = _timeInterval - timestampSecond % _timeInterval;

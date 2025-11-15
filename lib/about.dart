@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:totp/instance_manage.dart';
+import 'package:totp/model/totp_key_list.dart';
 
 import 'doc.dart';
-import 'widgets/subpages_app_bar.dart';
+import 'widgets/app_bar.dart';
 import 'widgets/transition_builder.dart';
 
 class AboutPage extends StatelessWidget {
@@ -14,10 +16,19 @@ class AboutPage extends StatelessWidget {
       body: Center(
         child: Column(
           children: [
+            SizedBox(height: 120),
             _Logo(),
-            _AppInfo(),
-            _DocItem(name: "使用手册", filename: "assets/manual.md"),
-            _DocItem(name: "技术文档", filename: "assets/tech.md"),
+            SizedBox(height: 20),
+            Text("TOTP", style: Theme.of(context).textTheme.displayMedium),
+            SizedBox(height: 10),
+            Text("v1.0.0", style: Theme.of(context).textTheme.labelLarge),
+            SizedBox(height: 80),
+            _ButtonToNewPage(name: "使用手册", page: DocPage(index: 0)),
+            SizedBox(height: 8),
+            _ButtonToNewPage(name: "技术文档", page: DocPage(index: 1)),
+            SizedBox(height: 8),
+            _ButtonToNewPage(name: "实例管理", page: InstanceManagePage()),
+            SizedBox(height: 40),
             _Copyright(),
           ],
         ),
@@ -29,62 +40,59 @@ class AboutPage extends StatelessWidget {
 class _Logo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 100,
-      height: 100,
-      margin: EdgeInsets.only(top: 120, bottom: 20),
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: Colors.white,
-          width: 1,
-          style: BorderStyle.solid,
-        ),
-        borderRadius: BorderRadius.all(Radius.circular(20)),
-        image: DecorationImage(
-          image: AssetImage("assets/avatar_256.jpg"),
-          fit: BoxFit.contain,
+    return InkWell(
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (context) => Dialog(
+            child: Container(
+              width: 300,
+              constraints: BoxConstraints(maxHeight: 600),
+              padding: EdgeInsets.all(40),
+              child: ListView(
+                shrinkWrap: true,
+                children: [
+                  Text(
+                    TOTPKeyList().display(),
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+      child: Container(
+        width: 100,
+        height: 100,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(20)),
+          image: DecorationImage(
+            image: AssetImage("assets/avatar_256.jpg"),
+            fit: BoxFit.contain,
+          ),
         ),
       ),
     );
   }
 }
 
-class _AppInfo extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text("TOTP", textScaler: TextScaler.linear(1.8)),
-        SizedBox(height: 10),
-        Text(
-          "v1.0.0",
-          textScaler: TextScaler.linear(1.2),
-          style: TextStyle(color: Colors.grey),
-        ),
-        SizedBox(height: 100),
-      ],
-    );
-  }
-}
-
-class _DocItem extends StatelessWidget {
-  const _DocItem({required this.name, required this.filename});
+class _ButtonToNewPage extends StatelessWidget {
+  const _ButtonToNewPage({required this.name, required this.page});
 
   final String name;
-  final String filename;
+  final Widget page;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: 300,
       height: 50,
-      margin: EdgeInsets.only(bottom: 20),
       child: TextButton(
         onPressed: () {
           Navigator.of(context).push(
             PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  DocPage(title: name, filename: filename),
+              pageBuilder: (context, animation, secondaryAnimation) => page,
               transitionsBuilder: transition,
             ),
           );
@@ -93,12 +101,11 @@ class _DocItem extends StatelessWidget {
           shape: WidgetStateProperty.all(
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
-          side: WidgetStateProperty.all(
-            BorderSide(width: 1, color: Colors.grey),
+          backgroundColor: WidgetStateProperty.all(
+            Theme.of(context).colorScheme.onSurface,
           ),
-          backgroundColor: WidgetStateProperty.all(Colors.white),
         ),
-        child: Text(name, textScaler: TextScaler.linear(1.4)),
+        child: Text(name),
       ),
     );
   }
@@ -107,27 +114,18 @@ class _DocItem extends StatelessWidget {
 class _Copyright extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(top: 40),
-      child: Column(
-        children: [
-          Text(
-            "开发者：马同帅",
-            textScaler: TextScaler.linear(1.2),
-            style: TextStyle(color: Colors.grey),
-          ),
-          Text(
-            "代码地址：github.com/mats0319/totp",
-            textScaler: TextScaler.linear(0.8),
-            style: TextStyle(color: Colors.grey),
-          ),
-          Text(
-            "All Rights Reserved",
-            textScaler: TextScaler.linear(0.8),
-            style: TextStyle(color: Colors.grey),
-          ),
-        ],
-      ),
+    return Column(
+      children: [
+        Text("开发者：马同帅", style: Theme.of(context).textTheme.labelMedium),
+        Text(
+          "代码地址：github.com/mats0319/totp",
+          style: Theme.of(context).textTheme.labelSmall,
+        ),
+        Text(
+          "All Rights Reserved",
+          style: Theme.of(context).textTheme.labelSmall,
+        ),
+      ],
     );
   }
 }

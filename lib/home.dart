@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:totp/widgets/app_bar.dart';
 
-import 'about.dart';
 import 'model/totp_key.dart';
 import 'model/totp_key_list.dart';
 import 'widgets/key_item.dart';
-import 'widgets/key_item_empty.dart';
-import 'widgets/transition_builder.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -21,17 +19,12 @@ class _HomePageState extends State<HomePage> {
     var dataState = context.watch<TOTPKeyList>();
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        leading: SizedBox.shrink(),
-        title: Center(child: Text("TOTP")),
-        actions: [_ToAboutIcon()],
-      ),
+      appBar: homepageAppBar(context),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Expanded(child: ListView(children: displayKeyList(dataState.list))),
+            Expanded(child: ListView(children: _displayKeyList(dataState.list))),
           ],
         ),
       ),
@@ -39,36 +32,16 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class _ToAboutIcon extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return IconTheme(
-      data: IconThemeData(size: 28),
-      child: IconButton(
-        onPressed: () {
-          Navigator.of(context).push(
-            PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  const AboutPage(),
-              transitionsBuilder: transition,
-            ),
-          );
-        },
-        icon: Icon(Icons.apps),
-      ),
-    );
-  }
-}
-
-List<Widget> displayKeyList(List<TOTPKey> list) {
+List<Widget> _displayKeyList(List<TOTPKey> list) {
   List<Widget> res = [];
   for (var keyIns in list) {
-    if (!keyIns.isDeleted) {
+    if (!keyIns.isDeleted && keyIns.key.isNotEmpty) {
       res.add(KeyItem(keyIns: keyIns));
     }
   }
 
-  res.add(EmptyKeyItem());
+  // make sure there is a 'empty key item' at last
+  res.add(KeyItem(keyIns: TOTPKey.empty()));
 
   return res;
 }

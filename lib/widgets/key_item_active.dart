@@ -16,33 +16,37 @@ class ActiveKeyItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        border: BoxBorder.all(width: 2, color: Colors.grey),
-        borderRadius: BorderRadiusGeometry.circular(20),
+    return Padding(
+      padding: EdgeInsets.all(20),
+      child: Column(
+        children: [
+          _NameBar(name: keyIns.name, emitStatus: emitStatus),
+          _TimeBasedProgress(keyStr: keyIns.key),
+        ],
       ),
-      height: 300,
-      child: Padding(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Text(keyIns.name, textScaler: TextScaler.linear(2.2)),
-                Spacer(),
-                ElevatedButton(
-                  onPressed: () {
-                    emitStatus(false);
-                  },
-                  child: Text("静默", textScaler: TextScaler.linear(1.6)),
-                ),
-              ],
-            ),
-            SizedBox(height: 40),
-            _TimeBasedProgress(keyStr: keyIns.key),
-          ],
+    );
+  }
+}
+
+class _NameBar extends StatelessWidget {
+  const _NameBar({required this.name, required this.emitStatus});
+
+  final String name;
+  final Function(bool) emitStatus;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(name, style: Theme.of(context).textTheme.displayLarge),
+        Spacer(),
+        ElevatedButton(
+          onPressed: () {
+            emitStatus(false);
+          },
+          child: Text("静默", style: Theme.of(context).textTheme.headlineLarge),
         ),
-      ),
+      ],
     );
   }
 }
@@ -84,34 +88,37 @@ class _TimeBasedProgressState extends State<_TimeBasedProgress> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        SizedBox(width: 80),
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            SizedBox(
-              width: 150,
-              height: 150,
-              child: CircularProgressIndicator(
-                value: _timeRemain / 30,
-                backgroundColor: Colors.grey[200],
-              ),
+    return Padding(
+      padding: EdgeInsets.only(top: 40),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          SizedBox(
+            width: 150,
+            height: 150,
+            child: CircularProgressIndicator(
+              value: _timeRemain / 30,
+              color: Theme.of(context).colorScheme.secondary,
+              backgroundColor: Theme.of(context).colorScheme.surface,
             ),
-            Text(_totpStr, textScaler: TextScaler.linear(2)),
-          ],
-        ),
-        SizedBox(
-          width: 80,
-          height: 150,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [Text("剩余：${_timeRemain.toInt()}秒")],
           ),
-        ),
-      ],
+          Text(_totpStr, style: Theme.of(context).textTheme.displayLarge),
+          SizedBox(
+            width: double.infinity,
+            height: 150,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  "剩余：${_timeRemain.toInt()}秒",
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

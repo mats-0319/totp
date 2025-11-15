@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 
 class Slide extends StatefulWidget {
-  Key keyStr;
-  List<Widget> actions;
-  Widget child;
-  double actionsWidth;
-
-  Slide({
+  const Slide({
     required this.keyStr,
     required this.child,
     required this.actionsWidth,
     required this.actions,
   }) : super(key: keyStr);
+
+  final Key keyStr;
+  final List<Widget> actions;
+  final Widget child;
+  final double actionsWidth;
 
   @override
   State<StatefulWidget> createState() => _Slide();

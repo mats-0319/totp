@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:totp/widgets/key_item_empty.dart';
 
 import 'key_item_active.dart';
 import 'key_item_silent.dart';
@@ -24,8 +25,32 @@ class _KeyItemState extends State<KeyItem> {
 
   @override
   Widget build(BuildContext context) {
-    return isActive
-        ? ActiveKeyItem(keyIns: widget.keyIns, emitStatus: _onStatusChanged)
-        : SilentKeyItem(keyIns: widget.keyIns, emitStatus: _onStatusChanged);
+    Widget keyItem = EmptyKeyItem();
+    double height = 200;
+
+    if (widget.keyIns.key.isNotEmpty) {
+      if (isActive) {
+        keyItem = ActiveKeyItem(
+          keyIns: widget.keyIns,
+          emitStatus: _onStatusChanged,
+        );
+        height = 300;
+      } else {
+        keyItem = SilentKeyItem(
+          keyIns: widget.keyIns,
+          emitStatus: _onStatusChanged,
+        );
+      }
+    }
+
+    return Container(
+      margin: EdgeInsets.only(left: 10, right: 10, top: 8, bottom: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadiusGeometry.circular(20),
+        color: Theme.of(context).colorScheme.onSurface,
+      ),
+      height: height,
+      child: keyItem,
+    );
   }
 }

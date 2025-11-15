@@ -2,7 +2,8 @@
 
 ## 设计图
 
-![设计图](assets/totp_design.png)
+<!-- 图片格式这样写是因为这个文档要在app内显示，所以配成了app寻找图片的路径，ide提示找不到不要改 -->
+![设计图](assets/design.png)
 
 ## 技术栈
 

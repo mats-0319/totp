@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:base32/base32.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -22,30 +23,24 @@ class TOTPKeyList extends ChangeNotifier {
   }
 
   Future<void> create(TOTPKey keyIns) async {
+    try {
+      base32.decode(keyIns.key);
+    } catch (_) {
+      throw "\"${keyIns.key}\"不是有效的base32字符串";
+    }
+
     int index = _getIndex(keyIns.key);
     if (index >= 0) {
-      if (!keyIns.isDeleted) {
-        return; // 'key' already exist
-      }
-
-      // if re-create an exist and deleted instance, recover it. (for demo key)
-      keyIns.isDeleted = false;
-    } else {
-      list.add(keyIns);
+      throw "\"${keyIns.key}\"已存在";
     }
+
+    list.add(keyIns);
 
     await write(list);
     notifyListeners();
   }
 
-  Future<void> update(TOTPKey keyIns) async {
-    int index = _getIndex(keyIns.key);
-    if (index < 0) {
-      return; // target 'key' not exist
-    }
-
-    list[index] = keyIns;
-
+  Future<void> update() async {
     await write(list);
     notifyListeners();
   }
@@ -60,6 +55,61 @@ class TOTPKeyList extends ChangeNotifier {
 
     await write(list);
     notifyListeners();
+  }
+
+  Future<void> deleteHard(String key) async {
+    int index = _getIndex(key);
+    if (index < 0) {
+      return; // target 'key' not exist
+    }
+
+    list.removeAt(index);
+
+    await write(list);
+    notifyListeners();
+  }
+
+  Future<void> reOrder(String key, int wantedIndex) async {
+    int index = _getIndex(key);
+    if (index < 0) {
+      return; // target 'key' not exist
+    }
+
+    if (wantedIndex > index) {
+      wantedIndex--;
+    }
+
+    TOTPKey keyIns = list[index];
+    list.removeAt(index);
+    list.insert(wantedIndex, keyIns);
+
+    await write(list);
+    notifyListeners();
+  }
+
+  // for test
+  String display() {
+    String res = "";
+    res = "> TOTP key list length: ${list.length}\n";
+    for (var i = 0; i < list.length; i++) {
+      res += "> item $i: ";
+      if (list[i].key.isEmpty) {
+        res += "is empty.\n";
+      } else if (list[i].isDeleted) {
+        res +=
+            "is deleted.\n"
+            "  key: ${list[i].key},\n";
+      } else {
+        res +=
+            "\n"
+            "  key: ${list[i].key},\n"
+            "  name: ${list[i].name},\n"
+            "  autoActive: ${list[i].autoActive},\n"
+            "  isDeleted: ${list[i].isDeleted},\n";
+      }
+    }
+
+    return res;
   }
 
   // _getIndex return index of target 'key' in this.list,

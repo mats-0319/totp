@@ -14,6 +14,7 @@ dependencies:
     sdk: flutter
 
   markdown_widget: ^2.3.2+8
+  mobile_scanner: ^7.1.3
   path_provider: ^2.1.5
   provider: ^6.1.5+1
 
@@ -30,6 +31,6 @@ flutter:
     - assets/avatar_256.jpg
     - assets/manual.md
     - assets/tech.md
-    - assets/totp_design.png
+    - assets/design.png
 
   uses-material-design: true

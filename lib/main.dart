@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:totp/theme.dart';
 
 import 'home.dart';
 import 'model/totp_key.dart';
@@ -14,15 +15,10 @@ void main() async {
 }
 
 Future<void> _addDemoKeyIns() async {
-  bool hasValidItemFlag = false;
-  for (var i = 0; i < TOTPKeyList().list.length; i++) {
-    if (!TOTPKeyList().list[i].isDeleted) {
-      hasValidItemFlag = true;
-      break;
-    }
-  }
-  if (!hasValidItemFlag) {
-    await TOTPKeyList().create(TOTPKey("HFLEOZBUOVKXMVRY", "demo", false));
+  if (TOTPKeyList().list.isEmpty) {
+    // base32 of 'mario'
+    await TOTPKeyList().create(TOTPKey("NVQXE2LP", "demo", false));
+    await TOTPKeyList().create(TOTPKey("NVQXE2LA", "demo2", true));
   }
 }
 
@@ -35,10 +31,7 @@ class App extends StatelessWidget {
       create: (context) => TOTPKeyList(),
       child: MaterialApp(
         title: "TOTP",
-        theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        ),
+        theme: defaultThemeData(),
         home: const HomePage(),
       ),
     );
