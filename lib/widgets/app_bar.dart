@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../about.dart';
-import 'transition_builder.dart';
+import 'package:totp/about.dart';
+import 'package:totp/widgets/transition_builder.dart';
 
 AppBar homepageAppBar(BuildContext context) {
   return AppBar(

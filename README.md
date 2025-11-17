@@ -23,6 +23,12 @@
 
 todo
 
+`flutter build apk --split-per-abi`
+`flutter install --use-application-binary=build/app/outputs/flutter-apk/app-arm64-v8a-release.apk`
+
+查看手机cpu架构：（需要手机开启usb调试）
+`adb shell getprop | grep cpu`
+
 ## 技术
 
 todo

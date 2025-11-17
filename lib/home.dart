@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:totp/widgets/app_bar.dart';
 
-import 'model/totp_key.dart';
-import 'model/totp_key_list.dart';
-import 'widgets/key_item.dart';
+import 'package:totp/model/totp_key.dart';
+import 'package:totp/model/totp_key_list.dart';
+import 'package:totp/widgets/app_bar.dart';
+import 'package:totp/widgets/key_instance.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -24,7 +24,9 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Expanded(child: ListView(children: _displayKeyList(dataState.list))),
+            Expanded(
+              child: ListView(children: _displayKeyList(dataState.list)),
+            ),
           ],
         ),
       ),
@@ -34,14 +36,15 @@ class _HomePageState extends State<HomePage> {
 
 List<Widget> _displayKeyList(List<TOTPKey> list) {
   List<Widget> res = [];
+
   for (var keyIns in list) {
     if (!keyIns.isDeleted && keyIns.key.isNotEmpty) {
-      res.add(KeyItem(keyIns: keyIns));
+      res.add(KeyInstance(keyIns: keyIns));
     }
   }
 
   // make sure there is a 'empty key item' at last
-  res.add(KeyItem(keyIns: TOTPKey.empty()));
+  res.add(KeyInstance(keyIns: TOTPKey.empty()));
 
   return res;
 }

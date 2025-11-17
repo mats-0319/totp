@@ -5,7 +5,6 @@ class TOTPKey {
   bool isDeleted = false;
 
   TOTPKey(this.key, this.name, this.autoActive);
-  TOTPKey.all(this.key, this.name, this.autoActive, this.isDeleted);
   TOTPKey.empty();
 
   TOTPKey.fromJson(Map<String, dynamic> json) {

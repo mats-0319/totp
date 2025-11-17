@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../components/dotted_line.dart';
-import 'dialog_create.dart';
+import 'package:totp/components/dotted_line.dart';
+import 'package:totp/widgets/dialog_operate_instance.dart';
 
-class EmptyKeyItem extends StatelessWidget {
-  const EmptyKeyItem({super.key});
+class EmptyKeyInstance extends StatelessWidget {
+  const EmptyKeyInstance({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +12,11 @@ class EmptyKeyItem extends StatelessWidget {
       padding: EdgeInsets.all(28),
       child: InkWell(
         onTap: () {
-          showDialog(context: context, builder: (context) => CreateDialog());
+          showDialog(
+            context: context,
+            builder: (context) =>
+                OperateInstanceDialog(operate: Operate.create),
+          );
         },
         child: Stack(
           children: [

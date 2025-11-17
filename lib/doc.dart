@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:markdown_widget/markdown_widget.dart';
 
-import 'widgets/app_bar.dart';
+import 'package:totp/widgets/app_bar.dart';
 
 List<_DocItem> _docFiles = [
   _DocItem("使用手册", "assets/manual.md"),
@@ -10,17 +10,17 @@ List<_DocItem> _docFiles = [
 ];
 
 class DocPage extends StatelessWidget {
-  const DocPage({super.key, required this.index});
+  const DocPage({super.key, required int index}) : _index = index;
 
-  final int index;
+  final int _index;
 
   @override
   Widget build(BuildContext context) {
-    if (!(0 <= index && index < _docFiles.length)) {
+    if (!(0 <= _index && _index < _docFiles.length)) {
       return Center(child: Text("无效的文档编号"));
     }
 
-    _DocItem docItemIns = _docFiles[index];
+    _DocItem docItemIns = _docFiles[_index];
 
     return Scaffold(
       appBar: subpageAppBar(context, docItemIns.name),

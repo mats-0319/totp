@@ -1,26 +1,28 @@
 import 'package:flutter/material.dart';
 
-import '../model/totp_key.dart';
-import '../model/totp_key_list.dart';
-import '../components/slide_horizontal.dart';
-import 'dialog_modify.dart';
+import 'package:totp/theme.dart';
+import 'package:totp/components/slide_horizontal.dart';
+import 'package:totp/model/totp_key.dart';
+import 'package:totp/model/totp_key_list.dart';
+import 'package:totp/widgets/dialog_operate_instance.dart';
 
-class SilentKeyItem extends StatelessWidget {
-  const SilentKeyItem({
+class SilentKeyInstance extends StatelessWidget {
+  const SilentKeyInstance({
     super.key,
-    required this.keyIns,
-    required this.emitStatus,
-  });
+    required TOTPKey keyIns,
+    required Function(bool) emitStatus,
+  }) : _emitStatus = emitStatus,
+       _keyIns = keyIns;
 
-  final TOTPKey keyIns;
-  final Function(bool) emitStatus;
+  final TOTPKey _keyIns;
+  final Function(bool) _emitStatus;
 
   @override
   Widget build(BuildContext context) {
     return Slide(
-      actions: [_DeleteButton(keyStr: keyIns.key)],
+      actions: [_DeleteButton(keyStr: _keyIns.key)],
       actionsWidth: 100,
-      keyStr: Key(keyIns.key),
+      keyStr: Key(_keyIns.key),
       child: Container(
         padding: EdgeInsets.only(left: 20, right: 20),
         decoration: BoxDecoration(
@@ -30,12 +32,21 @@ class SilentKeyItem extends StatelessWidget {
         height: double.infinity,
         child: Row(
           children: [
-            _ModifyButton(keyIns: keyIns),
+            _ModifyButton(keyIns: _keyIns),
             Spacer(),
-            _ActiveButton(emitStatus: emitStatus),
+            _activeButton(),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _activeButton() {
+    return ElevatedButton(
+      onPressed: () {
+        _emitStatus(true);
+      },
+      child: Text("激活", style: blackText(-1)),
     );
   }
 }
@@ -61,16 +72,19 @@ class _DeleteButton extends StatelessWidget {
             bottomRight: Radius.circular(20),
           ),
         ),
-        child: Text("删除", style: TextStyle(color: Colors.white)),
+        child: Text(
+          "删除",
+          style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
+        ),
       ),
     );
   }
 }
 
 class _ModifyButton extends StatelessWidget {
-  const _ModifyButton({required this.keyIns});
+  const _ModifyButton({required TOTPKey keyIns}) : _keyIns = keyIns;
 
-  final TOTPKey keyIns;
+  final TOTPKey _keyIns;
 
   @override
   Widget build(BuildContext context) {
@@ -81,30 +95,12 @@ class _ModifyButton extends StatelessWidget {
         onPressed: () {
           showDialog(
             context: context,
-            builder: (context) => ModifyDialog(isReadonly: true, keyIns: keyIns),
+            builder: (context) =>
+                OperateInstanceDialog(operate: Operate.modify, keyIns: _keyIns),
           );
         },
-        child: Text(
-          keyIns.name,
-          style: Theme.of(context).textTheme.displayMedium,
-        ),
+        child: Text(_keyIns.name, style: blackText(1)),
       ),
-    );
-  }
-}
-
-class _ActiveButton extends StatelessWidget {
-  const _ActiveButton({required this.emitStatus});
-
-  final Function(bool) emitStatus;
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () {
-        emitStatus(true);
-      },
-      child: Text("激活", style: Theme.of(context).textTheme.headlineLarge),
     );
   }
 }

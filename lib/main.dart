@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:totp/theme.dart';
 
-import 'home.dart';
-import 'model/totp_key.dart';
-import 'model/totp_key_list.dart';
+import 'package:totp/theme.dart';
+import 'package:totp/home.dart';
+import 'package:totp/model/totp_key.dart';
+import 'package:totp/model/totp_key_list.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,7 +18,6 @@ Future<void> _addDemoKeyIns() async {
   if (TOTPKeyList().list.isEmpty) {
     // base32 of 'mario'
     await TOTPKeyList().create(TOTPKey("NVQXE2LP", "demo", false));
-    await TOTPKeyList().create(TOTPKey("NVQXE2LA", "demo2", true));
   }
 }
 

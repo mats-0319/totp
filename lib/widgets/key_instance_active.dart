@@ -1,18 +1,20 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 
-import '../dart/totp.dart';
-import '../model/totp_key.dart';
+import 'package:totp/theme.dart';
+import 'package:totp/dart/totp.dart';
+import 'package:totp/model/totp_key.dart';
 
-class ActiveKeyItem extends StatelessWidget {
-  const ActiveKeyItem({
+class ActiveKeyInstance extends StatelessWidget {
+  const ActiveKeyInstance({
     super.key,
-    required this.keyIns,
-    required this.emitStatus,
-  });
+    required TOTPKey keyIns,
+    required Function(bool) emitStatus,
+  }) : _emitStatus = emitStatus,
+       _keyIns = keyIns;
 
-  final TOTPKey keyIns;
-  final Function(bool) emitStatus;
+  final TOTPKey _keyIns;
+  final Function(bool) _emitStatus;
 
   @override
   Widget build(BuildContext context) {
@@ -20,31 +22,23 @@ class ActiveKeyItem extends StatelessWidget {
       padding: EdgeInsets.all(20),
       child: Column(
         children: [
-          _NameBar(name: keyIns.name, emitStatus: emitStatus),
-          _TimeBasedProgress(keyStr: keyIns.key),
+          _nameBar(),
+          _TimeBasedProgress(keyStr: _keyIns.key),
         ],
       ),
     );
   }
-}
-
-class _NameBar extends StatelessWidget {
-  const _NameBar({required this.name, required this.emitStatus});
-
-  final String name;
-  final Function(bool) emitStatus;
-
-  @override
-  Widget build(BuildContext context) {
+  
+  Widget _nameBar() {
     return Row(
       children: [
-        Text(name, style: Theme.of(context).textTheme.displayLarge),
+        Text(_keyIns.name, style: blackText(2)),
         Spacer(),
         ElevatedButton(
           onPressed: () {
-            emitStatus(false);
+            _emitStatus(false);
           },
-          child: Text("静默", style: Theme.of(context).textTheme.headlineLarge),
+          child: Text("静默", style: blackText(-1)),
         ),
       ],
     );
@@ -52,9 +46,9 @@ class _NameBar extends StatelessWidget {
 }
 
 class _TimeBasedProgress extends StatefulWidget {
-  const _TimeBasedProgress({required this.keyStr});
+  const _TimeBasedProgress({required String keyStr}) : _keyStr = keyStr;
 
-  final String keyStr;
+  final String _keyStr;
 
   @override
   State<_TimeBasedProgress> createState() => _TimeBasedProgressState();
@@ -72,7 +66,7 @@ class _TimeBasedProgressState extends State<_TimeBasedProgress> {
     _timerIns = Timer.periodic(Duration(milliseconds: 100), (timer) {
       _timeRemain -= 0.1;
       if (_timeRemain <= 0) {
-        var (totpStr, timeRemain) = generateTOTP(widget.keyStr);
+        var (totpStr, timeRemain) = generateTOTP(widget._keyStr);
         _totpStr = totpStr;
         _timeRemain = timeRemain;
       }
@@ -102,7 +96,7 @@ class _TimeBasedProgressState extends State<_TimeBasedProgress> {
               backgroundColor: Theme.of(context).colorScheme.surface,
             ),
           ),
-          Text(_totpStr, style: Theme.of(context).textTheme.displayLarge),
+          Text(_totpStr, style: blackText(2)),
           SizedBox(
             width: double.infinity,
             height: 150,
@@ -110,10 +104,7 @@ class _TimeBasedProgressState extends State<_TimeBasedProgress> {
               mainAxisAlignment: MainAxisAlignment.end,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(
-                  "剩余：${_timeRemain.toInt()}秒",
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
+                Text("剩余：${_timeRemain.toInt()}秒", style: blackText(-2)),
               ],
             ),
           ),

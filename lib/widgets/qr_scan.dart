@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
-import '../widgets/app_bar.dart';
+import 'package:totp/widgets/app_bar.dart';
 
 class QRScanPage extends StatefulWidget {
-  const QRScanPage({super.key, required this.emitCode});
+  const QRScanPage({super.key, required Function(String) emitCode})
+    : _emitCode = emitCode;
 
-  final Function(String) emitCode;
+  final Function(String) _emitCode;
 
   @override
   State<QRScanPage> createState() => _QRScanPageState();
@@ -14,6 +15,22 @@ class QRScanPage extends StatefulWidget {
 
 class _QRScanPageState extends State<QRScanPage> {
   Barcode? _code;
+
+  void _onHandleQRCode(BarcodeCapture code) {
+    if (!mounted || _code == code.barcodes.firstOrNull) {
+      return; // ignore duplicated scan
+    }
+
+    setState(() {
+      _code = code.barcodes.firstOrNull;
+    });
+
+    widget._emitCode(_code?.displayValue ?? "");
+    // will close dialog in preview page,
+    // 尝试过常规路由返回、默认leading组建的scaffold.closeDrawer，都不行，
+    // 只能由用户点击返回按钮
+    // Navigator.of(context).pop();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,28 +46,11 @@ class _QRScanPageState extends State<QRScanPage> {
             decoration: BoxDecoration(color: Color.fromRGBO(0, 0, 0, 0.4)),
             child: Text(
               "扫描结果：${_code?.displayValue ?? ''}",
-              style: TextStyle(color: Colors.white),
-              textScaler: TextScaler.linear(1.2),
+              style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
             ),
           ),
         ],
       ),
     );
-  }
-
-  void _onHandleQRCode(BarcodeCapture code) {
-    if (!mounted || _code == code.barcodes.firstOrNull) {
-      return;
-    }
-
-    setState(() {
-      _code = code.barcodes.firstOrNull;
-    });
-
-    widget.emitCode(_code?.displayValue ?? "");
-    // will close dialog in preview page,
-    // 尝试过常规路由返回、默认leading组建的scaffold.closeDrawer，都不行，
-    // 只能由用户点击返回按钮
-    // Navigator.of(context).pop();
   }
 }

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+
+import 'package:totp/theme.dart';
+import 'package:totp/doc.dart';
 import 'package:totp/instance_manage.dart';
 import 'package:totp/model/totp_key_list.dart';
-
-import 'doc.dart';
-import 'widgets/app_bar.dart';
-import 'widgets/transition_builder.dart';
+import 'package:totp/widgets/app_bar.dart';
+import 'package:totp/widgets/transition_builder.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
@@ -19,20 +20,30 @@ class AboutPage extends StatelessWidget {
             SizedBox(height: 120),
             _Logo(),
             SizedBox(height: 20),
-            Text("TOTP", style: Theme.of(context).textTheme.displayMedium),
+            Text("TOTP", style: blackText(1)),
             SizedBox(height: 10),
-            Text("v1.0.0", style: Theme.of(context).textTheme.labelLarge),
+            Text("v1.0.0", style: greyText(-1)),
             SizedBox(height: 80),
             _ButtonToNewPage(name: "使用手册", page: DocPage(index: 0)),
             SizedBox(height: 8),
             _ButtonToNewPage(name: "技术文档", page: DocPage(index: 1)),
             SizedBox(height: 8),
             _ButtonToNewPage(name: "实例管理", page: InstanceManagePage()),
-            SizedBox(height: 40),
-            _Copyright(),
+            SizedBox(height: 52),
+            _copyright(),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _copyright() {
+    return Column(
+      children: [
+        Text("开发者：马同帅", style: greyText(-2)),
+        Text("代码地址：github.com/mats0319/totp", style: greyText(-3)),
+        Text("All Rights Reserved", style: greyText(-3)),
+      ],
     );
   }
 }
@@ -51,12 +62,7 @@ class _Logo extends StatelessWidget {
               padding: EdgeInsets.all(40),
               child: ListView(
                 shrinkWrap: true,
-                children: [
-                  Text(
-                    TOTPKeyList().display(),
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                ],
+                children: [Text(TOTPKeyList().display(), style: blackText(-2))],
               ),
             ),
           ),
@@ -78,10 +84,12 @@ class _Logo extends StatelessWidget {
 }
 
 class _ButtonToNewPage extends StatelessWidget {
-  const _ButtonToNewPage({required this.name, required this.page});
+  const _ButtonToNewPage({required String name, required Widget page})
+    : _page = page,
+      _name = name;
 
-  final String name;
-  final Widget page;
+  final String _name;
+  final Widget _page;
 
   @override
   Widget build(BuildContext context) {
@@ -92,7 +100,7 @@ class _ButtonToNewPage extends StatelessWidget {
         onPressed: () {
           Navigator.of(context).push(
             PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) => page,
+              pageBuilder: (context, animation, secondaryAnimation) => _page,
               transitionsBuilder: transition,
             ),
           );
@@ -105,27 +113,8 @@ class _ButtonToNewPage extends StatelessWidget {
             Theme.of(context).colorScheme.onSurface,
           ),
         ),
-        child: Text(name),
+        child: Text(_name, style: blackText(-1)),
       ),
-    );
-  }
-}
-
-class _Copyright extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text("开发者：马同帅", style: Theme.of(context).textTheme.labelMedium),
-        Text(
-          "代码地址：github.com/mats0319/totp",
-          style: Theme.of(context).textTheme.labelSmall,
-        ),
-        Text(
-          "All Rights Reserved",
-          style: Theme.of(context).textTheme.labelSmall,
-        ),
-      ],
     );
   }
 }
