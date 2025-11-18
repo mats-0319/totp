@@ -20,20 +20,35 @@ class AboutPage extends StatelessWidget {
             SizedBox(height: 120),
             _Logo(),
             SizedBox(height: 20),
-            Text("TOTP", style: blackText(1)),
-            SizedBox(height: 10),
-            Text("v1.0.0", style: greyText(-1)),
+            _nameInfo(),
             SizedBox(height: 80),
-            _ButtonToNewPage(name: "使用手册", page: DocPage(index: 0)),
-            SizedBox(height: 8),
-            _ButtonToNewPage(name: "技术文档", page: DocPage(index: 1)),
-            SizedBox(height: 8),
-            _ButtonToNewPage(name: "实例管理", page: InstanceManagePage()),
+            _buttonsToNewPages(),
             SizedBox(height: 52),
             _copyright(),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _nameInfo() {
+    return Column(
+      children: [
+        Text("TOTP", style: blackText(1)),
+        Text("v1.0.0", style: greyText(-1)),
+      ],
+    );
+  }
+
+  Widget _buttonsToNewPages() {
+    return Column(
+      children: [
+        _ButtonToNewPage(name: "使用手册", page: DocPage(index: 0)),
+        SizedBox(height: 8),
+        _ButtonToNewPage(name: "技术文档", page: DocPage(index: 1)),
+        SizedBox(height: 8),
+        _ButtonToNewPage(name: "实例管理", page: InstanceManagePage()),
+      ],
     );
   }
 
@@ -84,12 +99,10 @@ class _Logo extends StatelessWidget {
 }
 
 class _ButtonToNewPage extends StatelessWidget {
-  const _ButtonToNewPage({required String name, required Widget page})
-    : _page = page,
-      _name = name;
+  const _ButtonToNewPage({required this.name, required this.page});
 
-  final String _name;
-  final Widget _page;
+  final String name;
+  final Widget page;
 
   @override
   Widget build(BuildContext context) {
@@ -97,14 +110,12 @@ class _ButtonToNewPage extends StatelessWidget {
       width: 300,
       height: 50,
       child: TextButton(
-        onPressed: () {
-          Navigator.of(context).push(
-            PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) => _page,
-              transitionsBuilder: transition,
-            ),
-          );
-        },
+        onPressed: () => Navigator.of(context).push(
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) => page,
+            transitionsBuilder: transition,
+          ),
+        ),
         style: ButtonStyle(
           shape: WidgetStateProperty.all(
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -113,7 +124,7 @@ class _ButtonToNewPage extends StatelessWidget {
             Theme.of(context).colorScheme.onSurface,
           ),
         ),
-        child: Text(_name, style: blackText(-1)),
+        child: Text(name, style: blackText(-1)),
       ),
     );
   }

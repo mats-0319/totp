@@ -4,10 +4,9 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:totp/widgets/app_bar.dart';
 
 class QRScanPage extends StatefulWidget {
-  const QRScanPage({super.key, required Function(String) emitCode})
-    : _emitCode = emitCode;
+  const QRScanPage({super.key, required this.emitCode});
 
-  final Function(String) _emitCode;
+  final Function(String) emitCode;
 
   @override
   State<QRScanPage> createState() => _QRScanPageState();
@@ -25,7 +24,7 @@ class _QRScanPageState extends State<QRScanPage> {
       _code = code.barcodes.firstOrNull;
     });
 
-    widget._emitCode(_code?.displayValue ?? "");
+    widget.emitCode(_code?.displayValue ?? "");
     // will close dialog in preview page,
     // 尝试过常规路由返回、默认leading组建的scaffold.closeDrawer，都不行，
     // 只能由用户点击返回按钮

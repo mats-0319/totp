@@ -31,15 +31,13 @@ class _ToAboutIcon extends StatelessWidget {
     return IconTheme(
       data: IconThemeData(size: 32),
       child: IconButton(
-        onPressed: () {
-          Navigator.of(context).push(
-            PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  const AboutPage(),
-              transitionsBuilder: transition,
-            ),
-          );
-        },
+        onPressed: () => Navigator.of(context).push(
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                const AboutPage(),
+            transitionsBuilder: transition,
+          ),
+        ),
         icon: Icon(Icons.apps),
       ),
     );

@@ -27,13 +27,11 @@ class _InstanceManagePageState extends State<InstanceManagePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ElevatedButton(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) =>
-                      OperateInstanceDialog(operate: Operate.create),
-                );
-              },
+              onPressed: () => showDialog(
+                context: context,
+                builder: (context) =>
+                    OperateInstanceDialog(operate: Operate.create),
+              ),
               child: Text("新增"),
             ),
             SizedBox(height: 20),
@@ -85,6 +83,7 @@ class _KeyInstanceState extends State<_KeyInstance> {
             Column(
               children: [
                 _ModifyButton(keyIns: widget.keyIns),
+                _ReOrderButton(keyStr: widget.keyIns.key, index: widget.index),
                 _DeleteButton(keyStr: widget.keyIns.key),
               ],
             ),
@@ -112,60 +111,103 @@ class _KeyInstanceState extends State<_KeyInstance> {
 }
 
 class _ModifyButton extends StatelessWidget {
-  const _ModifyButton({required TOTPKey keyIns}) : _keyIns = keyIns;
+  const _ModifyButton({required this.keyIns});
 
-  final TOTPKey _keyIns;
+  final TOTPKey keyIns;
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: () {
-        showDialog(
-          context: context,
-          builder: (context) =>
-              OperateInstanceDialog(operate: Operate.edit, keyIns: _keyIns),
-        );
-      },
+      onPressed: () => showDialog(
+        context: context,
+        builder: (context) =>
+            OperateInstanceDialog(operate: Operate.edit, keyIns: keyIns),
+      ),
       child: Text("编辑", style: blackText(-2)),
     );
   }
 }
 
-class _DeleteButton extends StatelessWidget {
-  const _DeleteButton({required String keyStr}) : _keyStr = keyStr;
+class _ReOrderButton extends StatefulWidget {
+  const _ReOrderButton({required this.keyStr, required this.index});
 
-  final String _keyStr;
+  final String keyStr;
+  final int index;
+
+  @override
+  State<_ReOrderButton> createState() => _ReOrderButtonState();
+}
+
+class _ReOrderButtonState extends State<_ReOrderButton> {
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () => showDialog(
+        context: context,
+        builder: (context) => Dialog(
+          child: Padding(
+            padding: EdgeInsets.only(top: 40, bottom: 40),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _reOrderButton("移动到开头", 0),
+                SizedBox(height: 20),
+                _reOrderButton("向前移动一个", widget.index - 1),
+                SizedBox(height: 20),
+                _reOrderButton("向后移动一个", widget.index + 1),
+                SizedBox(height: 20),
+                _reOrderButton("移动到末尾", TOTPKeyList().list.length),
+              ],
+            ),
+          ),
+        ),
+      ),
+      child: Text("排序", style: blackText(-2)),
+    );
+  }
+
+  Widget _reOrderButton(String text, int index) {
+    return ElevatedButton(
+      onPressed: () {
+        TOTPKeyList().reOrder(widget.keyStr, index);
+        Navigator.of(context).pop(); // 因为要在这里用context，所以widget用有状态的
+      },
+      child: Text(text),
+    );
+  }
+}
+
+class _DeleteButton extends StatelessWidget {
+  const _DeleteButton({required this.keyStr});
+
+  final String keyStr;
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: () {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: Text("删除密钥实例", style: blackText(1)),
-            content: Text(
-              "本次删除不可恢复，请确认是否删除密钥为：$_keyStr的实例?",
-              style: blackText(-1),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text("取消", style: greyText(-1)),
-              ),
-              TextButton(
-                onPressed: () async {
-                  await TOTPKeyList().deleteHard(_keyStr);
-                  Navigator.of(context).pop();
-                },
-                child: Text("确认", style: blackText(-1)),
-              ),
-            ],
+      onPressed: () => showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text("删除密钥实例", style: blackText(1)),
+          content: Text(
+            "本次删除不可恢复，请确认是否删除密钥为：$keyStr的实例?",
+            style: blackText(-1),
           ),
-        );
-      },
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text("取消", style: greyText(-1)),
+            ),
+            TextButton(
+              onPressed: () {
+                TOTPKeyList().deleteHard(keyStr);
+                Navigator.of(context).pop();
+              },
+              child: Text("确认", style: blackText(-1)),
+            ),
+          ],
+        ),
+      ),
       child: Text("删除", style: blackText(-2)),
     );
   }

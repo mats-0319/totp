@@ -10,17 +10,17 @@ List<_DocItem> _docFiles = [
 ];
 
 class DocPage extends StatelessWidget {
-  const DocPage({super.key, required int index}) : _index = index;
+  const DocPage({super.key, required this.index});
 
-  final int _index;
+  final int index;
 
   @override
   Widget build(BuildContext context) {
-    if (!(0 <= _index && _index < _docFiles.length)) {
+    if (!(0 <= index && index < _docFiles.length)) {
       return Center(child: Text("无效的文档编号"));
     }
 
-    _DocItem docItemIns = _docFiles[_index];
+    _DocItem docItemIns = _docFiles[index];
 
     return Scaffold(
       appBar: subpageAppBar(context, docItemIns.name),

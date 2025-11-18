@@ -9,20 +9,19 @@ import 'package:totp/widgets/dialog_operate_instance.dart';
 class SilentKeyInstance extends StatelessWidget {
   const SilentKeyInstance({
     super.key,
-    required TOTPKey keyIns,
-    required Function(bool) emitStatus,
-  }) : _emitStatus = emitStatus,
-       _keyIns = keyIns;
+    required this.keyIns,
+    required this.emitStatus,
+  });
 
-  final TOTPKey _keyIns;
-  final Function(bool) _emitStatus;
+  final TOTPKey keyIns;
+  final Function(bool) emitStatus;
 
   @override
   Widget build(BuildContext context) {
     return Slide(
-      actions: [_DeleteButton(keyStr: _keyIns.key)],
+      actions: [_DeleteButton(keyStr: keyIns.key)],
       actionsWidth: 100,
-      keyStr: Key(_keyIns.key),
+      keyStr: Key(keyIns.key),
       child: Container(
         padding: EdgeInsets.only(left: 20, right: 20),
         decoration: BoxDecoration(
@@ -32,7 +31,7 @@ class SilentKeyInstance extends StatelessWidget {
         height: double.infinity,
         child: Row(
           children: [
-            _ModifyButton(keyIns: _keyIns),
+            _ModifyButton(keyIns: keyIns),
             Spacer(),
             _activeButton(),
           ],
@@ -43,9 +42,7 @@ class SilentKeyInstance extends StatelessWidget {
 
   Widget _activeButton() {
     return ElevatedButton(
-      onPressed: () {
-        _emitStatus(true);
-      },
+      onPressed: () => emitStatus(true),
       child: Text("激活", style: blackText(-1)),
     );
   }
@@ -59,9 +56,7 @@ class _DeleteButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () async {
-        await TOTPKeyList().delete(keyStr);
-      },
+      onTap: () => TOTPKeyList().delete(keyStr),
       child: Container(
         alignment: Alignment.center,
         width: 120,
@@ -82,9 +77,9 @@ class _DeleteButton extends StatelessWidget {
 }
 
 class _ModifyButton extends StatelessWidget {
-  const _ModifyButton({required TOTPKey keyIns}) : _keyIns = keyIns;
+  const _ModifyButton({required this.keyIns});
 
-  final TOTPKey _keyIns;
+  final TOTPKey keyIns;
 
   @override
   Widget build(BuildContext context) {
@@ -92,14 +87,12 @@ class _ModifyButton extends StatelessWidget {
       width: 200,
       height: 60,
       child: ElevatedButton(
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (context) =>
-                OperateInstanceDialog(operate: Operate.modify, keyIns: _keyIns),
-          );
-        },
-        child: Text(_keyIns.name, style: blackText(1)),
+        onPressed: () => showDialog(
+          context: context,
+          builder: (context) =>
+              OperateInstanceDialog(operate: Operate.modify, keyIns: keyIns),
+        ),
+        child: Text(keyIns.name, style: blackText(1)),
       ),
     );
   }

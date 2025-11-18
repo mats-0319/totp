@@ -22,6 +22,15 @@ class TOTPKeyList extends ChangeNotifier {
     list = await read();
   }
 
+  Function createOrUpdate(Object? v) {
+    switch (v) {
+      case TOTPKey keyIns?:
+        return () => create(keyIns);
+      default:
+        return () => update();
+    }
+  }
+
   Future<void> create(TOTPKey keyIns) async {
     if (keyIns.key.isEmpty) {
       throw "key不能为空";
@@ -74,18 +83,18 @@ class TOTPKeyList extends ChangeNotifier {
   }
 
   Future<void> reOrder(String key, int wantedIndex) async {
+    if (!(0 <= wantedIndex && wantedIndex <= list.length)) {
+      throw "无效的目标索引位置"; // use 'insert' as 'push' is ok
+    }
+
     int index = _getIndex(key);
     if (index < 0 || wantedIndex == index) {
       return; // target 'key' not exist / no-reorder
     }
 
-    if (wantedIndex > index) {
-      wantedIndex--;
-    }
-
     TOTPKey keyIns = list[index];
-    list.removeAt(index);
-    list.insert(wantedIndex, keyIns); // use 'insert' as 'push' is ok in dart
+    list.insert(wantedIndex, keyIns);
+    list.removeAt(index > wantedIndex ? index + 1 : index);
 
     await write(list);
     notifyListeners();

@@ -4,17 +4,17 @@
 
 ## 设计图
 
-![设计图](doc/design.png)
+![设计图](assets/design.png)
 
 ## 目录
 
 - android：android配置
 - assets：资源文件
+- demo：功能demo
 - doc
 - lib：
   - components：直接复制代码来用的组件，考虑吃透之后改写到widgets目录
   - dart
-  - demo：功能demo，可以直接运行的
   - model：数据结构
   - widgets：组件
   - `*.dart`文件：主要页面
