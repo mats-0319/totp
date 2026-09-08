@@ -1,17 +1,24 @@
 import "dart:convert";
-import "package:test/test.dart";
+
+import 'package:flutter_test/flutter_test.dart';
 import "package:totp/model/totp_key.dart";
 
 void main() {
   test("Test totp key instance (de)serialize.", () {
     TOTPKey totpKeyIns = TOTPKey("a totp key", "a totp pwd name", true);
-    expect(jsonEncode(totpKeyIns),
-        '{"key":"a totp key","name":"a totp pwd name","autoActive":true,"isDeleted":false}');
+    expect(
+      jsonEncode(totpKeyIns),
+      '{"key":"a totp key","name":"a totp pwd name","autoActive":true,"isDeleted":false}',
+    );
 
-    var totpKeyJson = jsonDecode('{"key":"a totp key","name":"a totp pwd name","autoActive":true,"isDeleted":false}') as Map<String, dynamic>;
+    var totpKeyJson = jsonDecode(
+      '{"key":"a totp key","name":"a totp pwd name","autoActive":true,"isDeleted":false}',
+    ) as Map<String, dynamic>;
     TOTPKey totpKeyInsFromJson = TOTPKey.fromJson(totpKeyJson);
-    expect(json.encode(totpKeyInsFromJson),
-        '{"key":"a totp key","name":"a totp pwd name","autoActive":true,"isDeleted":false}');
+    expect(
+      json.encode(totpKeyInsFromJson),
+      '{"key":"a totp key","name":"a totp pwd name","autoActive":true,"isDeleted":false}',
+    );
   });
 
   test("Test totp key instance list (de)serialize.", () {

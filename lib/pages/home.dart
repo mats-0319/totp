@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+import 'package:totp/components/key_instance_active.dart';
+import 'package:totp/components/key_instance_silent.dart';
 import 'package:totp/model/totp_key.dart';
 import 'package:totp/model/totp_key_list.dart';
 import 'package:totp/widgets/app_bar.dart';
-import 'package:totp/widgets/key_instance_empty.dart';
-import 'package:totp/widgets/key_instance_active.dart';
-import 'package:totp/widgets/key_instance_silent.dart';
+import 'package:totp/widgets/floating_action_button.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -22,6 +21,7 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       appBar: homepageAppBar(context),
+      floatingActionButton: floatingActionButton(context),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -37,7 +37,7 @@ class _HomePageState extends State<HomePage> {
 }
 
 List<Widget> _displayKeyList(List<TOTPKey> list) {
-  List<Widget> res = [];
+  List<Widget> res = [SizedBox(height: 20)];
 
   for (var keyIns in list) {
     if (!keyIns.isDeleted && keyIns.key.isNotEmpty) {
@@ -45,8 +45,7 @@ List<Widget> _displayKeyList(List<TOTPKey> list) {
     }
   }
 
-  // make sure there is a 'empty key item' at last
-  res.add(_KeyInstance(keyIns: TOTPKey.empty()));
+  res.add(SizedBox(height: 20));
 
   return res;
 }
@@ -61,36 +60,33 @@ class _KeyInstance extends StatefulWidget {
 }
 
 class _KeyInstanceState extends State<_KeyInstance> {
-  late bool _isActive = widget.keyIns.autoActive;
-
   void _onStatusChanged(bool flag) {
     setState(() {
-      _isActive = flag;
+      widget.keyIns.autoActive = flag;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    Widget keyItem = EmptyKeyInstance();
-    double height = 200;
+    late Widget keyItem;
+    late double height;
 
-    if (widget.keyIns.key.isNotEmpty) {
-      if (_isActive) {
-        keyItem = ActiveKeyInstance(
-          keyIns: widget.keyIns,
-          emitStatus: _onStatusChanged,
-        );
-        height = 300;
-      } else {
-        keyItem = SilentKeyInstance(
-          keyIns: widget.keyIns,
-          emitStatus: _onStatusChanged,
-        );
-      }
+    if (widget.keyIns.autoActive) {
+      keyItem = ActiveKeyInstance(
+        keyIns: widget.keyIns,
+        emitStatus: _onStatusChanged,
+      );
+      height = 270;
+    } else {
+      keyItem = SilentKeyInstance(
+        keyIns: widget.keyIns,
+        emitStatus: _onStatusChanged,
+      );
+      height = 130;
     }
 
     return Container(
-      margin: EdgeInsets.only(left: 10, right: 10, top: 8, bottom: 8),
+      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         borderRadius: BorderRadiusGeometry.circular(20),
         color: Theme.of(context).colorScheme.onSurface,

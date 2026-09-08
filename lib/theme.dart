@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 ThemeData defaultThemeData() {
   return ThemeData(
     colorScheme: ColorScheme.fromSeed(
-      seedColor: Color.fromRGBO(210, 208, 186, 1),
-      surface: Color.fromRGBO(210, 208, 186, 1),
-      // background
+      seedColor: Color.fromRGBO(210, 209, 186, 1),
+      // z-index: 0
+      surface: Color.fromRGBO(210, 209, 186, 1),
+      // z-index: 1
       onSurface: Color.fromRGBO(240, 239, 226, 1),
-      // items background
       primary: Colors.black,
       secondary: Colors.grey,
       tertiary: Colors.white,

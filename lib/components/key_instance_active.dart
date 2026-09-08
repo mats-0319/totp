@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
 
-import 'package:totp/theme.dart';
+import 'package:flutter/material.dart';
 import 'package:totp/dart/totp.dart';
 import 'package:totp/model/totp_key.dart';
+import 'package:totp/theme.dart';
 
 class ActiveKeyInstance extends StatelessWidget {
   const ActiveKeyInstance({
@@ -22,7 +22,8 @@ class ActiveKeyInstance extends StatelessWidget {
       child: Column(
         children: [
           _nameBar(),
-          _TimeBasedProgress(keyStr: keyIns.key),
+          SizedBox(height: 20),
+          _TimeBasedProgress(keyBase32: keyIns.key),
         ],
       ),
     );
@@ -31,7 +32,15 @@ class ActiveKeyInstance extends StatelessWidget {
   Widget _nameBar() {
     return Row(
       children: [
-        Text(keyIns.name, style: blackText(2)),
+        SizedBox(
+          width: 200,
+          child: Text(
+            keyIns.name,
+            style: blackText(1),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
         Spacer(),
         ElevatedButton(
           onPressed: () => emitStatus(false),
@@ -43,9 +52,9 @@ class ActiveKeyInstance extends StatelessWidget {
 }
 
 class _TimeBasedProgress extends StatefulWidget {
-  const _TimeBasedProgress({required this.keyStr});
+  const _TimeBasedProgress({required this.keyBase32});
 
-  final String keyStr;
+  final String keyBase32;
 
   @override
   State<_TimeBasedProgress> createState() => _TimeBasedProgressState();
@@ -53,7 +62,7 @@ class _TimeBasedProgress extends StatefulWidget {
 
 class _TimeBasedProgressState extends State<_TimeBasedProgress> {
   late Timer _timerIns;
-  String totpStr = "";
+  String totpCode = "";
   double timeRemain = 0.0;
 
   @override
@@ -63,9 +72,9 @@ class _TimeBasedProgressState extends State<_TimeBasedProgress> {
     _timerIns = Timer.periodic(Duration(milliseconds: 100), (timer) {
       timeRemain -= 0.1;
       if (timeRemain <= 0) {
-        var (totpStr_, timeRemain_) = generateTOTP(widget.keyStr);
-        totpStr = totpStr_;
-        timeRemain = timeRemain_;
+        var (tc, tr) = generateTOTP(widget.keyBase32);
+        totpCode = tc;
+        timeRemain = tr;
       }
       setState(() {});
     });
@@ -79,34 +88,26 @@ class _TimeBasedProgressState extends State<_TimeBasedProgress> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(top: 40),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          SizedBox(
-            width: 150,
-            height: 150,
-            child: CircularProgressIndicator(
-              value: timeRemain / 30,
-              color: Theme.of(context).colorScheme.secondary,
-              backgroundColor: Theme.of(context).colorScheme.surface,
-            ),
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        CircularProgressIndicator(
+          value: timeRemain / 30,
+          color: Theme.of(context).colorScheme.secondary,
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          constraints: BoxConstraints.tightFor(width: 150, height: 150),
+        ),
+        Text(totpCode, style: blackText(2)),
+        SizedBox(
+          width: double.infinity,
+          height: 150,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [Text("剩余：${timeRemain.toInt()}秒", style: blackText(-2))],
           ),
-          Text(totpStr, style: blackText(2)),
-          SizedBox(
-            width: double.infinity,
-            height: 150,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text("剩余：${timeRemain.toInt()}秒", style: blackText(-2)),
-              ],
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
