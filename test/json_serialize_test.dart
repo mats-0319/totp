@@ -6,19 +6,19 @@ import "package:totp/model/totp_key.dart";
 void main() {
   test("Test totp key instance (de)serialize.", () {
     TOTPKey totpKeyIns = TOTPKey("a totp key", "a totp pwd name", true);
-    expect(
-      jsonEncode(totpKeyIns),
-      '{"key":"a totp key","name":"a totp pwd name","autoActive":true,"isDeleted":false}',
-    );
 
-    var totpKeyJson = jsonDecode(
-      '{"key":"a totp key","name":"a totp pwd name","autoActive":true,"isDeleted":false}',
-    ) as Map<String, dynamic>;
-    TOTPKey totpKeyInsFromJson = TOTPKey.fromJson(totpKeyJson);
-    expect(
-      json.encode(totpKeyInsFromJson),
-      '{"key":"a totp key","name":"a totp pwd name","autoActive":true,"isDeleted":false}',
-    );
+    // json 对象的字段顺序没有语义，所以比较解析后的 map，而不是字符串字面量
+    Map<String, dynamic> expectJson = {
+      "key": "a totp key",
+      "name": "a totp pwd name",
+      "autoActive": true,
+      "isDeleted": false,
+    };
+
+    expect(jsonDecode(jsonEncode(totpKeyIns)), expectJson);
+
+    TOTPKey totpKeyInsFromJson = TOTPKey.fromJson(expectJson);
+    expect(jsonDecode(jsonEncode(totpKeyInsFromJson)), expectJson);
   });
 
   test("Test totp key instance list (de)serialize.", () {

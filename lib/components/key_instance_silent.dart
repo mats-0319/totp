@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:totp/components/dialog_modify.dart';
+import 'package:totp/components/dialog_instance.dart';
 import 'package:totp/model/totp_key.dart';
 import 'package:totp/theme.dart';
 
@@ -15,13 +15,8 @@ class SilentKeyInstance extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.only(left: 20, right: 20),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.onSurface,
-        borderRadius: BorderRadiusGeometry.circular(20),
-      ),
-      height: double.infinity,
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 30),
       child: Row(
         children: [
           _ModifyButton(keyIns: keyIns),
@@ -49,7 +44,8 @@ class _ModifyButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: () => showDialog(
           context: context,
-          builder: (context) => ModifyDialog(keyIns: keyIns),
+          builder: (context) =>
+              OperateDialog(operate: OperateE.modify, keyIns: keyIns),
         ),
         child: Text(
           keyIns.name,

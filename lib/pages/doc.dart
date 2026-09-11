@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:markdown_widget/markdown_widget.dart';
-
 import 'package:totp/widgets/app_bar.dart';
 
 List<_DocItem> _docFiles = [
@@ -31,6 +30,8 @@ class DocPage extends StatelessWidget {
           builder: (BuildContext context, AsyncSnapshot snapshot) {
             if (snapshot.hasData) {
               return MarkdownWidget(data: snapshot.data);
+            } else if (snapshot.hasError) {
+              return Center(child: Text("加载失败：${snapshot.error.toString()}"));
             } else {
               return Center(child: Text("加载中......"));
             }

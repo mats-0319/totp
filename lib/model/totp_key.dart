@@ -8,11 +8,17 @@ class TOTPKey {
 
   TOTPKey.empty();
 
+  TOTPKey.deepCopy(TOTPKey k)
+    : name = k.name,
+      key = k.key,
+      autoActive = k.autoActive,
+      isDeleted = k.isDeleted;
+
   TOTPKey.fromJson(Map<String, dynamic> json) {
-    name = json["name"];
-    key = json["key"];
-    autoActive = json["autoActive"];
-    isDeleted = json["isDeleted"];
+    name = json["name"] as String? ?? "";
+    key = json["key"] as String? ?? "";
+    autoActive = json["autoActive"] as bool? ?? false;
+    isDeleted = json["isDeleted"] as bool? ?? false;
   }
 
   Map<String, dynamic> toJson() {
@@ -23,4 +29,11 @@ class TOTPKey {
       "isDeleted": isDeleted,
     };
   }
+}
+
+void copyBack(TOTPKey origin, TOTPKey newIns) {
+  origin.name = newIns.name;
+  origin.key = newIns.key;
+  origin.autoActive = newIns.autoActive;
+  origin.isDeleted = newIns.isDeleted;
 }

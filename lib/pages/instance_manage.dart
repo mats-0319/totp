@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:totp/components/dialog_create.dart';
-import 'package:totp/components/dialog_edit.dart';
+import 'package:totp/components/dialog_instance.dart';
+import 'package:totp/dart/result.dart';
 import 'package:totp/model/totp_key.dart';
 import 'package:totp/model/totp_key_list.dart';
 import 'package:totp/theme.dart';
 import 'package:totp/widgets/app_bar.dart';
+import 'package:totp/widgets/print_alert.dart';
 
 class InstanceManagePage extends StatefulWidget {
   const InstanceManagePage({super.key});
@@ -30,7 +31,6 @@ class _InstanceManagePageState extends State<InstanceManagePage> {
             SizedBox(height: 20),
             Expanded(
               child: ReorderableListView(
-                shrinkWrap: true, // 防止expanded布局溢出错误
                 onReorderItem: (oldIndex, newIndex) async {
                   setState(() {
                     // 程序已经可以自动处理删除后索引变化问题了，不需要再手动判断索引和-1
@@ -54,31 +54,41 @@ Widget _functionBar(BuildContext context) {
   return Row(
     children: [
       ElevatedButton(
-        onPressed: () =>
-            showDialog(context: context, builder: (context) => CreateDialog()),
-        child: Text("新增"),
+        onPressed: () => showDialog(
+          context: context,
+          builder: (context) =>
+              OperateDialog(operate: OperateE.create, keyIns: TOTPKey.empty()),
+        ),
+        child: Text(OperateE.create.text),
       ),
       Spacer(),
       ElevatedButton(
         onPressed: () async {
-          final uri = await TOTPKeyList().export();
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(content: Text("导出文件：$uri")),
-          );
+          final res = await TOTPKeyList().export();
+          if (!context.mounted) {
+            return;
+          }
+
+          switch (res) {
+            case Success():
+              printAlert(context, "导出成功");
+            case Failure():
+          }
         },
         child: Text("导出"),
       ),
       SizedBox(width: 10),
       ElevatedButton(
         onPressed: () async {
-          try {
-            await TOTPKeyList().import();
-          } catch (e) {
-            showDialog(
-              context: context,
-              builder: (context) => AlertDialog(content: Text(e.toString())),
-            );
+          var res = await TOTPKeyList().import();
+          if (!context.mounted) {
+            return;
+          }
+
+          switch (res) {
+            case Failure():
+              printAlert(context, res.err);
+            case Success():
           }
         },
         child: Text("导入"),
@@ -141,9 +151,10 @@ Widget _operates(BuildContext context, TOTPKey keyIns) {
       ElevatedButton(
         onPressed: () => showDialog(
           context: context,
-          builder: (context) => EditDialog(keyIns: keyIns),
+          builder: (context) =>
+              OperateDialog(operate: OperateE.edit, keyIns: keyIns),
         ),
-        child: Text("编辑", style: blackText(-2)),
+        child: Text(OperateE.edit.text, style: blackText(-2)),
       ),
       ElevatedButton(
         onPressed: () => showDialog(
@@ -160,9 +171,11 @@ Widget _operates(BuildContext context, TOTPKey keyIns) {
                 child: Text("取消", style: greyText(-1)),
               ),
               TextButton(
-                onPressed: () {
-                  TOTPKeyList().deleteHard(keyIns.key);
-                  Navigator.of(context).pop();
+                onPressed: () async {
+                  await TOTPKeyList().deleteHard(keyIns.key);
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                  }
                 },
                 child: Text("确认", style: blackText(-1)),
               ),

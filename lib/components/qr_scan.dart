@@ -12,18 +12,31 @@ class QRScanPage extends StatefulWidget {
 }
 
 class _QRScanPageState extends State<QRScanPage> {
-  Barcode? _code;
+  final MobileScannerController _controller = MobileScannerController(
+    detectionSpeed: DetectionSpeed.noDuplicates,
+  );
 
-  void _onHandleQRCode(BarcodeCapture code) {
-    if (!mounted || _code == code.barcodes.firstOrNull) {
-      return; // ignore duplicated scan
+  String res = "";
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
+  }
+
+  Future<void> _onHandleQRCode(BarcodeCapture code) async {
+    var resNullable = code.barcodes.first.rawValue;
+    if (resNullable == null || resNullable == res) {
+      return; // ignore meaning-less scan and duplicate scan
     }
 
-    setState(() {
-      _code = code.barcodes.firstOrNull;
-    });
+    // 扫描到一个新的结果不暂停
 
-    widget.emitCode(_code?.displayValue ?? "");
+    res = resNullable;
+
+    setState(() {});
+
+    widget.emitCode(res);
     // will close dialog in preview page,
     // 尝试过常规路由返回、默认leading组建的scaffold.closeDrawer，都不行，
     // 只能由用户点击返回按钮
@@ -36,14 +49,14 @@ class _QRScanPageState extends State<QRScanPage> {
       appBar: subpageAppBar(context, "扫描密钥"),
       body: Stack(
         children: [
-          MobileScanner(onDetect: _onHandleQRCode),
+          MobileScanner(controller: _controller, onDetect: _onHandleQRCode),
           Container(
             height: 100,
             padding: EdgeInsets.all(20),
             alignment: Alignment.topLeft,
             decoration: BoxDecoration(color: Color.fromRGBO(0, 0, 0, 0.4)),
             child: Text(
-              "扫描结果：${_code?.displayValue ?? ''}",
+              "扫描结果：$res",
               style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
             ),
           ),

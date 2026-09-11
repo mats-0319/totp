@@ -40,8 +40,8 @@ List<Widget> _displayKeyList(List<TOTPKey> list) {
   List<Widget> res = [SizedBox(height: 20)];
 
   for (var keyIns in list) {
-    if (!keyIns.isDeleted && keyIns.key.isNotEmpty) {
-      res.add(_KeyInstance(keyIns: keyIns));
+    if (!keyIns.isDeleted) {
+      res.add(_KeyInstance(key: ValueKey(keyIns.key), keyIns: keyIns));
     }
   }
 
@@ -51,7 +51,7 @@ List<Widget> _displayKeyList(List<TOTPKey> list) {
 }
 
 class _KeyInstance extends StatefulWidget {
-  const _KeyInstance({required this.keyIns});
+  const _KeyInstance({super.key, required this.keyIns});
 
   final TOTPKey keyIns;
 
@@ -60,29 +60,28 @@ class _KeyInstance extends StatefulWidget {
 }
 
 class _KeyInstanceState extends State<_KeyInstance> {
+  late bool isActive = widget.keyIns.autoActive;
+
   void _onStatusChanged(bool flag) {
     setState(() {
-      widget.keyIns.autoActive = flag;
+      isActive = flag;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     late Widget keyItem;
-    late double height;
 
-    if (widget.keyIns.autoActive) {
+    if (isActive) {
       keyItem = ActiveKeyInstance(
         keyIns: widget.keyIns,
         emitStatus: _onStatusChanged,
       );
-      height = 270;
     } else {
       keyItem = SilentKeyInstance(
         keyIns: widget.keyIns,
         emitStatus: _onStatusChanged,
       );
-      height = 130;
     }
 
     return Container(
@@ -91,7 +90,6 @@ class _KeyInstanceState extends State<_KeyInstance> {
         borderRadius: BorderRadiusGeometry.circular(20),
         color: Theme.of(context).colorScheme.onSurface,
       ),
-      height: height,
       child: keyItem,
     );
   }

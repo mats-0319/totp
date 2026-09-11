@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:totp/components/qr_scan.dart';
+import 'package:totp/dart/result.dart';
 import 'package:totp/theme.dart';
+import 'package:totp/widgets/print_alert.dart';
 
 class KeyInputReadonly extends StatelessWidget {
   const KeyInputReadonly({super.key, required this.text});
@@ -167,7 +169,7 @@ class ConfirmButton extends StatefulWidget {
   const ConfirmButton({super.key, required this.text, required this.func});
 
   final String text;
-  final Function func;
+  final Future<Result<void>> Function() func;
 
   @override
   State<ConfirmButton> createState() => _ConfirmButtonState();
@@ -186,20 +188,21 @@ class _ConfirmButtonState extends State<ConfirmButton> {
                 _isLoading = true;
               });
 
-              try {
-                await widget.func();
-                Navigator.of(context).pop();
-              } catch (e) {
-                showDialog(
-                  context: context,
-                  builder: (context) =>
-                      AlertDialog(content: Text(e.toString())),
-                );
-              } finally {
-                setState(() {
-                  _isLoading = false;
-                });
+              var res = await widget.func();
+              if (!context.mounted) {
+                // 弹窗已经被关闭，继续 setState 会抛 "setState() called after dispose"
+                return;
               }
+
+              switch (res) {
+                case Success():
+                  Navigator.of(context).pop();
+                case Failure():
+                  printAlert(context, res.err);
+              }
+              setState(() {
+                _isLoading = false;
+              });
             },
       child: _isLoading
           ? CircularProgressIndicator(

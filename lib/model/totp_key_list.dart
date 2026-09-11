@@ -2,10 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:base32/base32.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:totp/dart/result.dart';
+import 'package:totp/dart/totp.dart';
 
 import 'totp_key.dart';
 
@@ -22,38 +23,73 @@ class TOTPKeyList extends ChangeNotifier {
   List<TOTPKey> list = [];
 
   Future<void> initialize() async {
-    list = await read();
+    var res = await read();
+    switch (res) {
+      case Success():
+        if (res.data.isNotEmpty) {
+          list = res.data;
+        } else {
+          await create(TOTPKey("NVQXE2LPNVQXE21", "demo", false));
+          await create(TOTPKey("NVQXE2LPNVQXE22", "demo2", true));
+        }
+      case Failure():
+      // todo：拟记录错误信息，加载主页面时，如果错误不空则优先加载错误信息；
+      // 备份当前文件，然后初始化示例实例
+    }
   }
 
-  Future<void> create(TOTPKey keyIns) async {
-    if (keyIns.key.isEmpty) {
-      throw "key不能为空";
-    }
+  Future<Result<void>> createList(List<TOTPKey> l) async {
+    List<TOTPKey> backup = list.toList();
+    list = [];
 
-    try {
-      base32.decode(keyIns.key);
-    } catch (_) {
-      throw "key:'${keyIns.key}'不是有效的base32字符串";
+    for (var k in l) {
+      var res = isValidKeyIns(k);
+      switch (res) {
+        case Success():
+          list.add(res.data);
+        case Failure():
+          list = backup;
+          return res;
+      }
     }
-
-    int index = _getIndex(keyIns.key);
-    if (index >= 0) {
-      throw "key:'${keyIns.key}'已存在";
-    }
-
-    list.add(keyIns);
 
     await synchronized();
+
+    return Success(data: null);
   }
 
-  Future<void> update(String keyBase32) async {
-    try {
-      base32.decode(keyBase32);
-    } catch (_) {
-      throw "key:'$keyBase32'不是有效的base32字符串";
+  Future<Result<void>> create(TOTPKey keyIns) async {
+    var res = isValidKeyIns(keyIns);
+    switch (res) {
+      case Success():
+        list.add(res.data);
+      case Failure():
+        return res;
     }
 
     await synchronized();
+
+    return Success(data: null);
+  }
+
+  Future<Result<void>> update(String keyBase32) async {
+    var res = normalize(keyBase32);
+    switch (res) {
+      case Failure():
+        return res;
+      case Success():
+    }
+
+    Set<String> keys = {};
+    for (var item in list) {
+      if (!keys.add(item.key)) {
+        return Failure(err: "更新失败，key：'${item.key}'已存在");
+      }
+    }
+
+    await synchronized();
+
+    return Success(data: null);
   }
 
   Future<void> delete(String key) async {
@@ -78,7 +114,7 @@ class TOTPKeyList extends ChangeNotifier {
     await synchronized();
   }
 
-  Future<String> export() async {
+  Future<Result<String>> export() async {
     final fileStr = jsonEncode(TOTPKeyList().list);
 
     final uri = await FilePicker.saveFile(
@@ -86,41 +122,66 @@ class TOTPKeyList extends ChangeNotifier {
       bytes: Uint8List.fromList(utf8.encode(fileStr)),
     );
     if (uri == null) {
-      return "";
+      return Failure(err: "");
     }
 
-    return uri.toString();
+    return Success(data: uri.toString());
   }
 
-  Future<void> import() async {
+  Future<Result<void>> import() async {
     final file = await FilePicker.pickFile();
     if (file == null) {
-      throw "读取文件失败";
+      return Failure(err: "读取文件失败");
     }
 
     final int fileSize = await file.length();
     if (fileSize > 1 << 20) {
-      throw "文件过大，请导入小于1M的json配置，当前文件大小：$fileSize";
+      return Failure(err: "文件过大，请导入小于1M的json配置，当前文件大小：$fileSize");
     }
 
-    list = [];
     final Uint8List fileBytes = await file.readAsBytes();
     final String fileStr = utf8.decode(fileBytes);
-    for (var value in jsonDecode(fileStr)) {
-      try {
-        final TOTPKey k = TOTPKey.fromJson(value);
-        create(k);
-      } catch (e) {
-        rethrow;
+    try {
+      List<TOTPKey> l = [];
+      for (var value in jsonDecode(fileStr)) {
+        l.add(TOTPKey.fromJson(value));
       }
+
+      var res = await createList(l);
+      switch (res) {
+        case Failure():
+          return res;
+        case Success():
+      }
+    } catch (e) {
+      return Failure(err: "导入失败：${e.toString()}");
     }
 
     await synchronized();
+
+    return Success(data: null);
   }
 
   Future<void> synchronized() async {
     await write(list);
     notifyListeners();
+  }
+
+  Result<TOTPKey> isValidKeyIns(TOTPKey keyIns) {
+    var res = normalize(keyIns.key);
+    switch (res) {
+      case Success():
+        keyIns.key = res.data;
+      case Failure():
+        return Failure(err: res.err);
+    }
+
+    int index = _getIndex(keyIns.key);
+    if (index >= 0) {
+      return Failure(err: "key:'${keyIns.key}'已存在");
+    }
+
+    return Success(data: keyIns);
   }
 
   // _getIndex return index of target 'key' in this.list,
@@ -141,22 +202,21 @@ class TOTPKeyList extends ChangeNotifier {
   }
 }
 
-Future<List<TOTPKey>> read() async {
+Future<Result<List<TOTPKey>>> read() async {
   List<TOTPKey> listIns = [];
-  String fileStr = "";
 
   try {
     File fileIns = await _openFile();
-    fileStr = await fileIns.readAsString();
-  } catch (err) {
-    return listIns;
-  }
+    String fileStr = await fileIns.readAsString();
 
-  for (var value in jsonDecode(fileStr)) {
-    listIns.add(TOTPKey.fromJson(value));
-  }
+    for (var value in jsonDecode(fileStr)) {
+      listIns.add(TOTPKey.fromJson(value));
+    }
 
-  return listIns;
+    return Success(data: listIns);
+  } catch (e) {
+    return Failure(err: "加载本地文件失败，错误：${e.toString()}");
+  }
 }
 
 Future<void> write(List<TOTPKey> list) async {
@@ -165,10 +225,13 @@ Future<void> write(List<TOTPKey> list) async {
 }
 
 Future<File> _openFile() async {
-  String keyFile = "totp_key.json";
-
   final directory = await getApplicationDocumentsDirectory();
   final path = directory.path;
 
-  return File("$path/$keyFile");
+  final dir = Directory(path);
+  if (!await dir.exists()) {
+    await dir.create(recursive: true);
+  }
+
+  return File("$path/totp_key.json");
 }
