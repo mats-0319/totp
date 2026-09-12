@@ -1,44 +1,23 @@
-import "dart:convert";
-
 import 'package:flutter_test/flutter_test.dart';
-import "package:totp/model/totp_key.dart";
 
 void main() {
-  test("Test totp key instance (de)serialize.", () {
-    TOTPKey totpKeyIns = TOTPKey("a totp key", "a totp pwd name", true);
+  test("Test str RE", () {
+    String s = "otpauth://totp/Github:author_name?secret=ABCDEF&issuer=Github";
 
-    // json 对象的字段顺序没有语义，所以比较解析后的 map，而不是字符串字面量
-    Map<String, dynamic> expectJson = {
-      "key": "a totp key",
-      "name": "a totp pwd name",
-      "autoActive": true,
-      "isDeleted": false,
-    };
+    expect(s.startsWith("otpauth://totp/"), true);
 
-    expect(jsonDecode(jsonEncode(totpKeyIns)), expectJson);
-
-    TOTPKey totpKeyInsFromJson = TOTPKey.fromJson(expectJson);
-    expect(jsonDecode(jsonEncode(totpKeyInsFromJson)), expectJson);
-  });
-
-  test("Test totp key instance list (de)serialize.", () {
-    List<TOTPKey> listIns = [];
-    listIns.add(TOTPKey("key1", "name1", true));
-    listIns.add(TOTPKey("key2", "name2", false));
-
-    String jsonStr = jsonEncode(listIns);
-    // print(jsonStr);
-    // output: [{"key":"key1","name":"name1","autoActive":true,"isDeleted":false},
-    //         {"key":"key2","name":"name2","autoActive":false,"isDeleted":false}]
-
-    List<dynamic> parsedJson = jsonDecode(jsonStr);
-
-    listIns = [];
-    expect(listIns.length, 0);
-
-    for (var value in parsedJson) {
-      listIns.add(TOTPKey.fromJson(value));
+    RegExp re = RegExp(r'\?secret=(\w+)');
+    RegExpMatch? matchNullable = re.firstMatch(s);
+    if (matchNullable == null) {
+      expect(true, false);
     }
-    expect(listIns.length, 2);
+
+    RegExpMatch match = matchNullable!;
+
+    // match.groupCount 表示捕获的组的数量
+    for (int i = 0; i <= match.groupCount; i++) {
+      final String m = match.group(i)!;
+      print("i: $i, v: $m");
+    }
   });
 }

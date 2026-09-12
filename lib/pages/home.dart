@@ -26,6 +26,7 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            ?_dataError(),
             Expanded(
               child: ListView(children: _displayKeyList(dataState.list)),
             ),
@@ -34,6 +35,14 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+}
+
+Widget? _dataError() {
+  if (TOTPKeyList().err.isNotEmpty) {
+    return Text(TOTPKeyList().err);
+  }
+
+  return null;
 }
 
 List<Widget> _displayKeyList(List<TOTPKey> list) {

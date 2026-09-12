@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:totp/components/dialog_instance.dart';
 import 'package:totp/dart/result.dart';
+import 'package:totp/model/export.dart';
 import 'package:totp/model/totp_key.dart';
 import 'package:totp/model/totp_key_list.dart';
 import 'package:totp/theme.dart';
@@ -64,7 +65,7 @@ Widget _functionBar(BuildContext context) {
       Spacer(),
       ElevatedButton(
         onPressed: () async {
-          final res = await TOTPKeyList().export();
+          final res = await export(TOTPKeyList());
           if (!context.mounted) {
             return;
           }
@@ -80,7 +81,7 @@ Widget _functionBar(BuildContext context) {
       SizedBox(width: 10),
       ElevatedButton(
         onPressed: () async {
-          var res = await TOTPKeyList().import();
+          var res = await import(TOTPKeyList());
           if (!context.mounted) {
             return;
           }

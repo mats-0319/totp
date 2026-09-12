@@ -49,7 +49,7 @@ class _ModifyButton extends StatelessWidget {
         ),
         child: Text(
           keyIns.name,
-          style: blackText(1),
+          style: blackText(0),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),

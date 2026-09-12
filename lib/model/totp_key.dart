@@ -4,7 +4,7 @@ class TOTPKey {
   bool autoActive = false; // be active when app start
   bool isDeleted = false; // shadow on home page
 
-  TOTPKey(this.key, this.name, this.autoActive);
+  TOTPKey(this.name, this.key, this.autoActive);
 
   TOTPKey.empty();
 

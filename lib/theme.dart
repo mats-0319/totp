@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 ThemeData defaultThemeData() {
   return ThemeData(
+    useMaterial3: true,
     colorScheme: ColorScheme.fromSeed(
       seedColor: Color.fromRGBO(210, 209, 186, 1),
       // z-index: 0

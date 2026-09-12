@@ -60,13 +60,13 @@ Result<String> normalize(String keyBase32) {
 
   keyBase32 = keyBase32.toUpperCase();
 
-  int padding = keyBase32.length % 8;
-  if (padding != 0) {
-    keyBase32 = keyBase32.padRight((keyBase32.length + 8) ~/ 8 * 8, "=");
-  }
-
   try {
-    base32.decode(keyBase32);
+    final keyDecoded = base32.decode(keyBase32);
+    final keyReEncode = base32.encode(keyDecoded);
+    if (keyBase32 != keyReEncode) {
+      // base32编码noPadding模式会忽略最后一组[1,3,6]个字符（返回空数组）
+      throw "往返校验失败";
+    }
   } catch (e) {
     return Failure(err: "key:'$keyBase32'不是有效的base32字符串，错误信息：${e.toString()}");
   }

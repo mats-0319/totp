@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:totp/dart/result.dart';
@@ -21,20 +19,38 @@ class TOTPKeyList extends ChangeNotifier {
   }
 
   List<TOTPKey> list = [];
+  String err = "";
 
   Future<void> initialize() async {
-    var res = await read();
+    List<TOTPKey> demoInstanceList = [
+      TOTPKey("demo", "NVQXE2LPNVQXE2L2", false),
+      TOTPKey("demo2", "NVQXE2LPNVQXE2L3", true),
+    ];
+
+    List<TOTPKey> l = [];
+
+    try {
+      File fileIns = await _openFile();
+      String fileStr = await fileIns.readAsString();
+
+      for (var value in jsonDecode(fileStr)) {
+        l.add(TOTPKey.fromJson(value));
+      }
+
+      if (l.isEmpty) {
+        l = demoInstanceList;
+      }
+    } catch (e) {
+      err = e.toString();
+      _backupFile();
+      l = demoInstanceList;
+    }
+
+    var res = await createList(l);
     switch (res) {
-      case Success():
-        if (res.data.isNotEmpty) {
-          list = res.data;
-        } else {
-          await create(TOTPKey("NVQXE2LPNVQXE21", "demo", false));
-          await create(TOTPKey("NVQXE2LPNVQXE22", "demo2", true));
-        }
       case Failure():
-      // todo：拟记录错误信息，加载主页面时，如果错误不空则优先加载错误信息；
-      // 备份当前文件，然后初始化示例实例
+        err = res.err;
+      case Success():
     }
   }
 
@@ -114,54 +130,6 @@ class TOTPKeyList extends ChangeNotifier {
     await synchronized();
   }
 
-  Future<Result<String>> export() async {
-    final fileStr = jsonEncode(TOTPKeyList().list);
-
-    final uri = await FilePicker.saveFile(
-      fileName: "totp_key.json",
-      bytes: Uint8List.fromList(utf8.encode(fileStr)),
-    );
-    if (uri == null) {
-      return Failure(err: "");
-    }
-
-    return Success(data: uri.toString());
-  }
-
-  Future<Result<void>> import() async {
-    final file = await FilePicker.pickFile();
-    if (file == null) {
-      return Failure(err: "读取文件失败");
-    }
-
-    final int fileSize = await file.length();
-    if (fileSize > 1 << 20) {
-      return Failure(err: "文件过大，请导入小于1M的json配置，当前文件大小：$fileSize");
-    }
-
-    final Uint8List fileBytes = await file.readAsBytes();
-    final String fileStr = utf8.decode(fileBytes);
-    try {
-      List<TOTPKey> l = [];
-      for (var value in jsonDecode(fileStr)) {
-        l.add(TOTPKey.fromJson(value));
-      }
-
-      var res = await createList(l);
-      switch (res) {
-        case Failure():
-          return res;
-        case Success():
-      }
-    } catch (e) {
-      return Failure(err: "导入失败：${e.toString()}");
-    }
-
-    await synchronized();
-
-    return Success(data: null);
-  }
-
   Future<void> synchronized() async {
     await write(list);
     notifyListeners();
@@ -202,23 +170,6 @@ class TOTPKeyList extends ChangeNotifier {
   }
 }
 
-Future<Result<List<TOTPKey>>> read() async {
-  List<TOTPKey> listIns = [];
-
-  try {
-    File fileIns = await _openFile();
-    String fileStr = await fileIns.readAsString();
-
-    for (var value in jsonDecode(fileStr)) {
-      listIns.add(TOTPKey.fromJson(value));
-    }
-
-    return Success(data: listIns);
-  } catch (e) {
-    return Failure(err: "加载本地文件失败，错误：${e.toString()}");
-  }
-}
-
 Future<void> write(List<TOTPKey> list) async {
   File fileIns = await _openFile();
   await fileIns.writeAsString(jsonEncode(list));
@@ -234,4 +185,14 @@ Future<File> _openFile() async {
   }
 
   return File("$path/totp_key.json");
+}
+
+Future<String> _backupFile() async {
+  File f = await _openFile();
+  int timestamp = DateTime.now().millisecondsSinceEpoch;
+
+  String newFileName = "${f.path}/totp_key_$timestamp.json";
+  await f.copy(newFileName);
+
+  return newFileName;
 }

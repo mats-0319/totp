@@ -5,7 +5,6 @@ import 'package:totp/dart/result.dart';
 import 'package:totp/dart/totp.dart';
 import 'package:totp/model/totp_key.dart';
 import 'package:totp/theme.dart';
-import 'package:totp/widgets/print_alert.dart';
 
 class ActiveKeyInstance extends StatelessWidget {
   const ActiveKeyInstance({
@@ -105,32 +104,27 @@ class _TimeBasedProgressState extends State<_TimeBasedProgress> {
     const int intervalMs = totpTimeInterval * 1000;
     timeRemain = (intervalMs - now.millisecondsSinceEpoch % intervalMs) / 1000;
 
-    // 只在跨入新的时间窗口时重新计算：直接判断 second/millisecond 会被定时器抖动漏掉
+    // 只在跨入新的时间窗口时重新计算
     final int step = now.millisecondsSinceEpoch ~/ intervalMs;
-    if (step != _timeStep) {
-      _timeStep = step;
-
-      var res = generateTOTP(widget.keyBase32);
-      switch (res) {
-        case Success():
-          totpCode = res.data;
-        case Failure():
-          totpCode = "";
-          // key 非法：提示后退回静默状态。这里可能是 initState 触发的，
-          // 不能同步 showDialog/setState 父级，放到当前帧结束后处理
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (!mounted) {
-              return;
-            }
-            printAlert(context, res.err);
-            widget.onActiveFailed(false);
-          });
-          return;
-      }
+    if (step == _timeStep) {
+      setState(() {});
+      return;
     }
 
-    if (notify) {
-      setState(() {});
+    _timeStep = step;
+
+    var res = generateTOTP(widget.keyBase32);
+    switch (res) {
+      case Success():
+        totpCode = res.data;
+
+        if (notify) {
+          setState(() {});
+        }
+      case Failure():
+        totpCode = "";
+        widget.onActiveFailed(false);
+        return;
     }
   }
 
