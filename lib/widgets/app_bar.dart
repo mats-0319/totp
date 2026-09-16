@@ -7,8 +7,13 @@ AppBar homepageAppBar(BuildContext context) {
 
   return AppBar(
     leading: SizedBox.shrink(),
-    title: Center(child: Text("TOTP", style: theme.textTheme.headlineLarge)),
-    actions: [_ToAboutIcon()],
+    title: Center(child: Text("TOTP", style: theme.textTheme.titleLarge)),
+    actions: [
+      IconButton(
+        onPressed: newPage(context, const AboutPage()),
+        icon: const Icon(Icons.apps),
+      ),
+    ],
   );
 }
 
@@ -17,20 +22,7 @@ AppBar subpageAppBar(BuildContext context, String title) {
 
   return AppBar(
     leading: BackButton(color: theme.colorScheme.primary),
-    title: Center(child: Text(title, style: theme.textTheme.headlineLarge)),
+    title: Center(child: Text(title, style: theme.textTheme.titleLarge)),
     actions: [SizedBox(width: 56)], // default leading width is 56
   );
-}
-
-class _ToAboutIcon extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return IconTheme(
-      data: IconThemeData(size: 28),
-      child: IconButton(
-        onPressed: newPage(context, const AboutPage()),
-        icon: Icon(Icons.apps),
-      ),
-    );
-  }
 }

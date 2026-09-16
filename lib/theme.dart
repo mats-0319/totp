@@ -1,47 +1,94 @@
 import 'package:flutter/material.dart';
 
-Color _darkColor({double o = 1}) => Color.fromRGBO(210, 209, 186, o);
+const Color _pageColor = Color.fromRGBO(210, 210, 190, 1); // z-index: 0
+const Color _cardColor = Color.fromRGBO(240, 240, 220, 1); // z-index: 1
+const Color _textColor = Colors.black; // 主文字
+const Color _mutedTextColor = Colors.grey; // 次级文字
 
-Color _lightColor({double o = 1}) => Color.fromRGBO(240, 239, 226, o);
-
+/// 主题的语义约定（改主题只改这里，业务代码只认角色，不认具体颜色）：
+///
+/// - 页面底色：`colorScheme.surface`
+/// - 卡片/工具条/按钮底色：`colorScheme.surfaceContainerLow`
+/// - 对话框底色：`colorScheme.surfaceContainerHigh`
+/// - 主文字（卡片/页面上）：`colorScheme.onSurface`
+/// - 次级文字（说明、版权、灰字）：`colorScheme.onSurfaceVariant`
+/// - 图标/返回键强调色：`colorScheme.primary`
+/// - 边框：`colorScheme.outline`
+/// - 半透明遮罩上的文字：`Colors.white`（遮罩是自绘的黑色半透明层，不走主题）
 ThemeData defaultThemeData() {
+  final ColorScheme colorScheme = ColorScheme.fromSeed(
+    seedColor: _pageColor,
+    brightness: Brightness.light,
+    primary: _textColor,
+    onPrimary: _cardColor,
+    surface: _pageColor,
+    onSurface: _textColor,
+    onSurfaceVariant: _mutedTextColor,
+    surfaceContainerLow: _cardColor,
+    surfaceContainerHigh: _cardColor,
+  );
+
   return ThemeData(
     useMaterial3: true,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: _darkColor(),
-      surface: _darkColor(),
-      onSurface: _lightColor(),
-      primary: Colors.black,
-      secondary: Colors.grey,
-      tertiary: Colors.white,
+    colorScheme: colorScheme,
+    scaffoldBackgroundColor: colorScheme.surface,
+    textTheme: _buildTextTheme(colorScheme),
+    appBarTheme: const AppBarThemeData(
+      backgroundColor: _cardColor,
+      foregroundColor: _textColor,
+      iconTheme: IconThemeData(size: 28, color: _textColor),
     ),
-    textTheme: TextTheme(
-      headlineLarge: TextStyle(
-        color: Colors.black,
-        fontSize: 24,
-        fontWeight: FontWeight.w700,
-      ),
-      headlineMedium: TextStyle(
-        color: Colors.black,
-        fontSize: 28,
-        fontWeight: FontWeight.w500,
-      ),
-      bodyLarge: TextStyle(color: Colors.black, fontSize: 32),
-      bodyMedium: TextStyle(color: Colors.black, fontSize: 28),
-      bodySmall: TextStyle(color: Colors.black, fontSize: 24),
-      labelLarge: TextStyle(color: Colors.black, fontSize: 20),
-      labelMedium: TextStyle(color: Colors.black, fontSize: 16),
-      labelSmall: TextStyle(color: Colors.black, fontSize: 12),
-      displayLarge: TextStyle(color: Colors.grey, fontSize: 20),
-      displayMedium: TextStyle(color: Colors.grey, fontSize: 16),
-      displaySmall: TextStyle(color: Colors.grey, fontSize: 12),
-    ),
-    appBarTheme: AppBarThemeData(backgroundColor: _lightColor()),
-    floatingActionButtonTheme: FloatingActionButtonThemeData(
-      backgroundColor: _lightColor(),
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      backgroundColor: _cardColor,
+      foregroundColor: _textColor,
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(backgroundColor: _lightColor(o: 0.8)),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: _cardColor,
+        foregroundColor: _textColor,
+      ),
     ),
+    cardTheme: const CardThemeData(color: _cardColor),
+    dialogTheme: const DialogThemeData(backgroundColor: _cardColor),
+  );
+}
+
+/// 覆盖全部 15 个角色：既不留下"未定义角色被填成 onSurface 色"的坑，
+/// 也让字号按 display > headline > title > body > label 的语义排列。
+TextTheme _buildTextTheme(ColorScheme colorScheme) {
+  TextStyle text(
+    double size, {
+    FontWeight weight = FontWeight.w400,
+    double height = 1.3,
+  }) {
+    return TextStyle(
+      color: colorScheme.onSurface,
+      fontSize: size,
+      fontWeight: weight,
+      height: height,
+    );
+  }
+
+  return TextTheme(
+    // display：最大的展示文字（TOTP 验证码）
+    displayLarge: text(36, height: 1.2),
+    displayMedium: text(32, height: 1.2),
+    displaySmall: text(28, height: 1.2),
+    // headline：区块/实例标题
+    headlineLarge: text(32, weight: FontWeight.w600, height: 1.2),
+    headlineMedium: text(28, weight: FontWeight.w500, height: 1.2),
+    headlineSmall: text(24, weight: FontWeight.w500, height: 1.2),
+    // title：页面与对话框标题
+    titleLarge: text(24, weight: FontWeight.w700, height: 1.2),
+    titleMedium: text(20, weight: FontWeight.w600, height: 1.2),
+    titleSmall: text(18, weight: FontWeight.w600, height: 1.2),
+    // body：正文
+    bodyLarge: text(24),
+    bodyMedium: text(20),
+    bodySmall: text(16),
+    // label：按钮、输入框标签
+    labelLarge: text(20, weight: FontWeight.w500),
+    labelMedium: text(16, weight: FontWeight.w500),
+    labelSmall: text(12, weight: FontWeight.w500),
   );
 }

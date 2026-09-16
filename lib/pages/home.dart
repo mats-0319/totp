@@ -84,7 +84,7 @@ class _KeyInstanceState extends State<_KeyInstance> {
       padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
         borderRadius: BorderRadiusGeometry.circular(20),
-        color: theme.colorScheme.onSurface,
+        color: theme.colorScheme.surfaceContainerLow,
       ),
       child: keyItem,
     );

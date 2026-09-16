@@ -58,7 +58,7 @@ Widget _functionBar(BuildContext context) {
     margin: EdgeInsets.only(bottom: 20),
     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
     decoration: BoxDecoration(
-      color: theme.colorScheme.onSurface,
+      color: theme.colorScheme.surfaceContainerLow,
       borderRadius: BorderRadius.circular(16),
     ),
     child: Row(
@@ -114,7 +114,7 @@ List<Widget> _displayKeyList(BuildContext context, List<TOTPKey> list) {
       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       decoration: BoxDecoration(
         borderRadius: BorderRadiusGeometry.circular(20),
-        color: theme.colorScheme.onSurface,
+        color: theme.colorScheme.surfaceContainerLow,
       ),
       child: Row(
         children: [_details(context, item), Spacer(), _operates(context, item)],
@@ -181,7 +181,12 @@ Widget _operates(BuildContext context, TOTPKey keyIns) {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text("取消", style: theme.textTheme.displayLarge),
+                child: Text(
+                  "取消",
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
               ),
               TextButton(
                 onPressed: () async {

@@ -57,10 +57,12 @@ class KeyInputReadonly extends StatelessWidget {
         contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: theme.colorScheme.secondary),
+          borderSide: BorderSide(color: theme.colorScheme.outline),
         ),
         hintText: text,
-        hintStyle: theme.textTheme.displayLarge,
+        hintStyle: theme.textTheme.bodyMedium?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
       ),
     );
   }
@@ -98,7 +100,7 @@ class _KeyInputState extends State<KeyInput> {
     return TextField(
       controller: _controller,
       onChanged: widget.onChanged,
-      style: theme.textTheme.bodySmall,
+      style: theme.textTheme.bodyLarge,
       decoration: InputDecoration(
         contentPadding: EdgeInsets.symmetric(horizontal: 12),
         border: OutlineInputBorder(
@@ -218,7 +220,7 @@ class _ConfirmButtonState extends State<ConfirmButton> {
   Widget _textOrLoading(ThemeData theme) {
     return _isLoading
         ? CircularProgressIndicator(
-            color: theme.colorScheme.secondary,
+            color: theme.colorScheme.onSurfaceVariant,
             backgroundColor: theme.colorScheme.surface,
           )
         : Text(widget.text);

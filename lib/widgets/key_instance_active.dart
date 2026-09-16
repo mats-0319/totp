@@ -141,11 +141,11 @@ class _TimeBasedProgressState extends State<_TimeBasedProgress> {
       children: [
         CircularProgressIndicator(
           value: timeRemain / totpTimeInterval,
-          color: theme.colorScheme.secondary,
+          color: theme.colorScheme.onSurfaceVariant,
           backgroundColor: theme.colorScheme.surface,
           constraints: BoxConstraints.tightFor(width: 150, height: 150),
         ),
-        Text(totpCode, style: theme.textTheme.bodyLarge),
+        Text(totpCode, style: theme.textTheme.displayMedium),
         Container(
           height: 150,
           alignment: Alignment.bottomRight,

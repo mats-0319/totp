@@ -56,7 +56,7 @@ class _OperateDialogState extends State<OperateDialog> {
           children: [
             Text(
               "${widget.operate.text}TOTP密钥实例",
-              style: theme.textTheme.bodySmall,
+              style: theme.textTheme.titleLarge,
             ),
             SizedBox(height: 30),
             NameInput(defaultValue: kc.name, onChanged: _onNameChanged),

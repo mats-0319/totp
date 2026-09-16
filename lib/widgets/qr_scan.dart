@@ -73,7 +73,9 @@ class _QRScanPageState extends State<QRScanPage> {
               children: [
                 Text(
                   "扫描结果：$scanStr",
-                  style: TextStyle(color: theme.colorScheme.tertiary),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: Colors.white,
+                  ),
                 ),
                 ?_error(theme),
                 ?_restartScan(),
@@ -87,7 +89,10 @@ class _QRScanPageState extends State<QRScanPage> {
 
   Widget? _error(ThemeData theme) {
     return err.isNotEmpty
-        ? Text(err, style: TextStyle(color: theme.colorScheme.tertiary))
+        ? Text(
+            err,
+            style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white),
+          )
         : null;
   }
 

@@ -32,13 +32,25 @@ class AboutPage extends StatelessWidget {
               page: DocPage(docIns: DocItemE.tech),
             ),
             _ButtonToNewPage(name: "实例管理", page: InstanceManagePage()),
-            SizedBox(height: 40),
-            Text("开发者：马同帅", style: theme.textTheme.displayMedium),
+            SizedBox(height: 50),
+            Text(
+              "开发者：马同帅",
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
             Text(
               "代码地址：github.com/mats0319/totp",
-              style: theme.textTheme.displaySmall,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
-            Text("All Rights Reserved", style: theme.textTheme.displaySmall),
+            Text(
+              "All Rights Reserved",
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
           ],
         ),
       ),
@@ -77,7 +89,7 @@ class _ButtonToNewPage extends StatelessWidget {
       child: ElevatedButton(
         onPressed: newPage(context, page),
         style: OutlinedButton.styleFrom(
-          backgroundColor: theme.colorScheme.onSurface,
+          backgroundColor: theme.colorScheme.surfaceContainerLow,
         ),
         child: Text(name, style: theme.textTheme.labelLarge),
       ),
