@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:totp/pages/doc.dart';
 import 'package:totp/pages/instance_manage.dart';
-import 'package:totp/theme.dart';
 import 'package:totp/widgets/app_bar.dart';
-import 'package:totp/widgets/transition_builder.dart';
+import 'package:totp/widgets/new_page.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: subpageAppBar(context, "关于我们"),
       body: Center(
@@ -17,17 +18,27 @@ class AboutPage extends StatelessWidget {
           children: [
             SizedBox(height: 120),
             _logo(),
-            SizedBox(height: 20),
-            Text("TOTP", style: blackText(1)),
-            Text("v1.0.0", style: greyText(-1)),
-            SizedBox(height: 80),
-            _ButtonToNewPage(name: "使用手册", page: DocPage(index: 0)),
-            _ButtonToNewPage(name: "技术文档", page: DocPage(index: 1)),
+            SizedBox(height: 40),
+            Text("T O T P", style: theme.textTheme.headlineMedium),
+            SizedBox(height: 10),
+            Text("v1.0.0", style: theme.textTheme.labelLarge),
+            SizedBox(height: 70),
+            _ButtonToNewPage(
+              name: "使用手册",
+              page: DocPage(docIns: DocItemE.manual),
+            ),
+            _ButtonToNewPage(
+              name: "技术文档",
+              page: DocPage(docIns: DocItemE.tech),
+            ),
             _ButtonToNewPage(name: "实例管理", page: InstanceManagePage()),
-            SizedBox(height: 52),
-            Text("开发者：马同帅", style: greyText(-2)),
-            Text("代码地址：github.com/mats0319/totp", style: greyText(-3)),
-            Text("All Rights Reserved", style: greyText(-3)),
+            SizedBox(height: 40),
+            Text("开发者：马同帅", style: theme.textTheme.displayMedium),
+            Text(
+              "代码地址：github.com/mats0319/totp",
+              style: theme.textTheme.displaySmall,
+            ),
+            Text("All Rights Reserved", style: theme.textTheme.displaySmall),
           ],
         ),
       ),
@@ -39,7 +50,7 @@ class AboutPage extends StatelessWidget {
       width: 100,
       height: 100,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(20)),
+        borderRadius: BorderRadius.all(Radius.circular(16)),
         image: DecorationImage(
           image: AssetImage("assets/logo_256.png"),
           fit: BoxFit.contain,
@@ -57,28 +68,18 @@ class _ButtonToNewPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    final theme = Theme.of(context);
+
+    return Container(
       padding: EdgeInsetsGeometry.only(top: 4, bottom: 4),
-      child: SizedBox(
-        width: 300,
-        height: 50,
-        child: TextButton(
-          onPressed: () => Navigator.of(context).push(
-            PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) => page,
-              transitionsBuilder: transition,
-            ),
-          ),
-          style: ButtonStyle(
-            shape: WidgetStateProperty.all(
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            ),
-            backgroundColor: WidgetStateProperty.all(
-              Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-          child: Text(name, style: blackText(-1)),
+      width: 300,
+      height: 60,
+      child: ElevatedButton(
+        onPressed: newPage(context, page),
+        style: OutlinedButton.styleFrom(
+          backgroundColor: theme.colorScheme.onSurface,
         ),
+        child: Text(name, style: theme.textTheme.labelLarge),
       ),
     );
   }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:totp/dart/result.dart';
-import 'package:totp/dart/totp.dart';
+import 'package:totp/dart/scan_str.dart';
 import 'package:totp/widgets/app_bar.dart';
 
 class QRScanPage extends StatefulWidget {
@@ -24,8 +24,8 @@ class _QRScanPageState extends State<QRScanPage> {
 
   @override
   void dispose() {
-    super.dispose();
     _controller.dispose();
+    super.dispose();
   }
 
   Future<void> _onHandleQRCode(BarcodeCapture code) async {
@@ -47,18 +47,17 @@ class _QRScanPageState extends State<QRScanPage> {
         widget.emitCode(scanStr);
       case Failure():
         err = res.err;
-        setState(() {});
     }
 
-    setState(() {});
-    // will close dialog in preview page,
-    // 尝试过常规路由返回、默认leading组建的scaffold.closeDrawer，都不行，
-    // 只能由用户点击返回按钮
-    // Navigator.of(context).pop();
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: subpageAppBar(context, "扫描密钥"),
       body: Stack(
@@ -74,11 +73,9 @@ class _QRScanPageState extends State<QRScanPage> {
               children: [
                 Text(
                   "扫描结果：$scanStr",
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.tertiary,
-                  ),
+                  style: TextStyle(color: theme.colorScheme.tertiary),
                 ),
-                ?_error(),
+                ?_error(theme),
                 ?_restartScan(),
               ],
             ),
@@ -88,47 +85,21 @@ class _QRScanPageState extends State<QRScanPage> {
     );
   }
 
-  Widget? _error() {
-    if (err.isNotEmpty) {
-      return Text(
-        err,
-        style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
-      );
-    }
-
-    return null;
+  Widget? _error(ThemeData theme) {
+    return err.isNotEmpty
+        ? Text(err, style: TextStyle(color: theme.colorScheme.tertiary))
+        : null;
   }
 
   Widget? _restartScan() {
-    if (_isPausing) {
-      return ElevatedButton(
-        onPressed: () async {
-          await _controller.start();
-          _isPausing = false;
-        },
-        child: Text("继续扫描"),
-      );
-    }
-
-    return null;
+    return _isPausing
+        ? ElevatedButton(
+            onPressed: () async {
+              await _controller.start();
+              setState(() => _isPausing = false);
+            },
+            child: Text("继续扫描"),
+          )
+        : null;
   }
-}
-
-Result<String> isValidScanStr(String str) {
-  // 'otpauth://' uri
-  if (str.startsWith("otpauth://totp/")) {
-    RegExp re = RegExp(r'\?secret=(\w+)');
-    final match = re.firstMatch(str);
-    if (match != null) {
-      str = match.group(1)!;
-    }
-  }
-
-  // raw base32 key & key parsed from standard uri
-  var res = normalize(str);
-  if (res is Success) {
-    return res;
-  }
-
-  return Failure(err: "无效的TOTP key：$str");
 }

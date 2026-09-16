@@ -4,50 +4,47 @@ import 'package:flutter/material.dart';
 import 'package:totp/dart/result.dart';
 import 'package:totp/dart/totp.dart';
 import 'package:totp/model/totp_key.dart';
-import 'package:totp/theme.dart';
 
 class ActiveKeyInstance extends StatelessWidget {
   const ActiveKeyInstance({
     super.key,
     required this.keyIns,
-    required this.emitStatus,
+    required this.onChanged,
   });
 
   final TOTPKey keyIns;
-  final Function(bool) emitStatus;
+  final Function(bool) onChanged;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.all(20),
-      child: Column(
-        children: [
-          _nameBar(),
-          SizedBox(height: 20),
-          _TimeBasedProgress(keyBase32: keyIns.key, onActiveFailed: emitStatus),
-        ],
-      ),
+    return Column(
+      children: [
+        _nameBar(context),
+        _TimeBasedProgress(keyBase32: keyIns.key, onActiveFailed: onChanged),
+      ],
     );
   }
 
-  Widget _nameBar() {
-    return Row(
-      children: [
-        SizedBox(
-          width: 200,
-          child: Text(
-            keyIns.name,
-            style: blackText(1),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+  Widget _nameBar(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      margin: EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 200,
+            child: Text(
+              keyIns.name,
+              style: theme.textTheme.headlineMedium,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
-        ),
-        Spacer(),
-        ElevatedButton(
-          onPressed: () => emitStatus(false),
-          child: Text("静默", style: blackText(-1)),
-        ),
-      ],
+          Spacer(),
+          ElevatedButton(onPressed: () => onChanged(false), child: Text("静默")),
+        ],
+      ),
     );
   }
 }
@@ -107,7 +104,9 @@ class _TimeBasedProgressState extends State<_TimeBasedProgress> {
     // 只在跨入新的时间窗口时重新计算
     final int step = now.millisecondsSinceEpoch ~/ intervalMs;
     if (step == _timeStep) {
-      setState(() {});
+      if (notify) {
+        setState(() {});
+      }
       return;
     }
 
@@ -124,7 +123,6 @@ class _TimeBasedProgressState extends State<_TimeBasedProgress> {
       case Failure():
         totpCode = "";
         widget.onActiveFailed(false);
-        return;
     }
   }
 
@@ -136,23 +134,24 @@ class _TimeBasedProgressState extends State<_TimeBasedProgress> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Stack(
       alignment: Alignment.center,
       children: [
         CircularProgressIndicator(
           value: timeRemain / totpTimeInterval,
-          color: Theme.of(context).colorScheme.secondary,
-          backgroundColor: Theme.of(context).colorScheme.surface,
+          color: theme.colorScheme.secondary,
+          backgroundColor: theme.colorScheme.surface,
           constraints: BoxConstraints.tightFor(width: 150, height: 150),
         ),
-        Text(totpCode, style: blackText(2)),
-        SizedBox(
-          width: double.infinity,
+        Text(totpCode, style: theme.textTheme.bodyLarge),
+        Container(
           height: 150,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [Text("剩余：${timeRemain.toInt()}秒", style: blackText(-2))],
+          alignment: Alignment.bottomRight,
+          child: Text(
+            "剩余：${timeRemain.toInt()}秒",
+            style: theme.textTheme.labelMedium,
           ),
         ),
       ],

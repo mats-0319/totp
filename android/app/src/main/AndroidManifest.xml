@@ -8,7 +8,9 @@
     <application
         android:label="TOTP"
         android:name="${applicationName}"
-        android:icon="@mipmap/logo_256">
+        android:icon="@mipmap/logo_256"
+        android:allowBackup="false"
+        android:fullBackupContent="false">
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -3,30 +3,29 @@ import 'package:flutter/services.dart';
 import 'package:markdown_widget/markdown_widget.dart';
 import 'package:totp/widgets/app_bar.dart';
 
-List<_DocItem> _docFiles = [
-  _DocItem("使用手册", "assets/manual.md"),
-  _DocItem("技术文档", "assets/tech.md"),
-];
+enum DocItemE {
+  manual(name: "使用手册", path: "doc/manual.md"),
+  tech(name: "技术文档", path: "doc/tech.md");
+
+  const DocItemE({required this.name, required this.path});
+
+  final String name;
+  final String path;
+}
 
 class DocPage extends StatelessWidget {
-  const DocPage({super.key, required this.index});
+  const DocPage({super.key, required this.docIns});
 
-  final int index;
+  final DocItemE docIns;
 
   @override
   Widget build(BuildContext context) {
-    if (!(0 <= index && index < _docFiles.length)) {
-      return Center(child: Text("无效的文档编号"));
-    }
-
-    _DocItem docItemIns = _docFiles[index];
-
     return Scaffold(
-      appBar: subpageAppBar(context, docItemIns.name),
+      appBar: subpageAppBar(context, docIns.name),
       body: Padding(
         padding: EdgeInsets.all(40),
         child: FutureBuilder(
-          future: rootBundle.loadString(docItemIns.filename),
+          future: rootBundle.loadString(docIns.path),
           builder: (BuildContext context, AsyncSnapshot snapshot) {
             if (snapshot.hasData) {
               return MarkdownWidget(data: snapshot.data);
@@ -40,11 +39,4 @@ class DocPage extends StatelessWidget {
       ),
     );
   }
-}
-
-class _DocItem {
-  String name = "";
-  String filename = "";
-
-  _DocItem(this.name, this.filename);
 }

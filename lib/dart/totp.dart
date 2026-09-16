@@ -58,11 +58,13 @@ Result<String> normalize(String keyBase32) {
     return Failure(err: "key不能为空");
   }
 
+  keyBase32 = keyBase32.replaceAll(r'=', "");
   keyBase32 = keyBase32.toUpperCase();
 
   try {
     final keyDecoded = base32.decode(keyBase32);
-    final keyReEncode = base32.encode(keyDecoded);
+    final keyReEncode = base32.encode(keyDecoded).replaceAll(r'=', "");
+
     if (keyBase32 != keyReEncode) {
       // base32编码noPadding模式会忽略最后一组[1,3,6]个字符（返回空数组）
       throw "往返校验失败";

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:totp/components/dialog_instance.dart';
 import 'package:totp/model/totp_key.dart';
+import 'package:totp/widgets/dialog_instance.dart';
 
 Widget floatingActionButton(BuildContext context) {
   return FloatingActionButton(
-    backgroundColor: Theme.of(context).colorScheme.onSurface,
     onPressed: () => showDialog(
       context: context,
       builder: (context) =>

@@ -1,12 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:totp/dart/kotlin_keystore.dart';
 import 'package:totp/dart/result.dart';
 import 'package:totp/dart/totp.dart';
-
-import 'totp_key.dart';
+import 'package:totp/model/totp_key.dart';
 
 class TOTPKeyList extends ChangeNotifier {
   static final TOTPKeyList _instance = TOTPKeyList._privateInit();
@@ -22,42 +23,46 @@ class TOTPKeyList extends ChangeNotifier {
   String err = "";
 
   Future<void> initialize() async {
-    List<TOTPKey> demoInstanceList = [
-      TOTPKey("demo", "NVQXE2LPNVQXE2L2", false),
-      TOTPKey("demo2", "NVQXE2LPNVQXE2L3", true),
-    ];
-
-    List<TOTPKey> l = [];
+    err = "";
 
     try {
       File fileIns = await _openFile();
-      String fileStr = await fileIns.readAsString();
+      Uint8List fileBytes = await fileIns.readAsBytes();
 
-      for (var value in jsonDecode(fileStr)) {
-        l.add(TOTPKey.fromJson(value));
+      List<TOTPKey> l = [];
+      if (fileBytes.isNotEmpty) {
+        var res = await AndroidKeyStore.decrypt(fileBytes);
+        switch (res) {
+          case Success():
+            fileBytes = res.data;
+          case Failure():
+            await _backupFile();
+            throw res.err;
+        }
+        for (var value in jsonDecode(utf8.decode(fileBytes))) {
+          l.add(TOTPKey.fromJson(value));
+        }
+      }
+      if (l.isEmpty) {
+        l = [
+          TOTPKey("demo", "NVQXE2LPNVQXE2L2", false),
+          TOTPKey("demo2", "NVQXE2LPNVQXE2L3", true),
+        ];
       }
 
-      if (l.isEmpty) {
-        l = demoInstanceList;
+      var res = await createList(l);
+      if (res is Failure) {
+        throw res.err;
       }
     } catch (e) {
       err = e.toString();
-      _backupFile();
-      l = demoInstanceList;
-    }
-
-    var res = await createList(l);
-    switch (res) {
-      case Failure():
-        err = res.err;
-      case Success():
+      notifyListeners();
     }
   }
 
   Future<Result<void>> createList(List<TOTPKey> l) async {
     List<TOTPKey> backup = list.toList();
     list = [];
-
     for (var k in l) {
       var res = isValidKeyIns(k);
       switch (res) {
@@ -69,9 +74,7 @@ class TOTPKeyList extends ChangeNotifier {
       }
     }
 
-    await synchronized();
-
-    return Success(data: null);
+    return await synchronized(() => list = backup);
   }
 
   Future<Result<void>> create(TOTPKey keyIns) async {
@@ -83,59 +86,42 @@ class TOTPKeyList extends ChangeNotifier {
         return res;
     }
 
-    await synchronized();
-
-    return Success(data: null);
+    return await synchronized(() => list.removeLast());
   }
 
-  Future<Result<void>> update(String keyBase32) async {
-    var res = normalize(keyBase32);
+  Future<Result<void>> update(TOTPKey keyIns) async {
+    var res = isValidKeyIns(keyIns, true);
+    if (res is Failure) {
+      return res;
+    }
+
+    return await synchronized(() {});
+  }
+
+  Future<Result<void>> deleteHard(String key) async {
+    int index = _getIndex(key);
+    if (index < 0) {
+      return Success(data: null); // target 'key' not exist
+    }
+
+    var item = list.removeAt(index);
+
+    return await synchronized(() => list.insert(index, item));
+  }
+
+  Future<Result<void>> synchronized(void Function() revert) async {
+    var res = await write(list);
     switch (res) {
-      case Failure():
-        return res;
       case Success():
+        notifyListeners();
+      case Failure():
+        revert();
     }
 
-    Set<String> keys = {};
-    for (var item in list) {
-      if (!keys.add(item.key)) {
-        return Failure(err: "更新失败，key：'${item.key}'已存在");
-      }
-    }
-
-    await synchronized();
-
-    return Success(data: null);
+    return res;
   }
 
-  Future<void> delete(String key) async {
-    int index = _getIndex(key);
-    if (index < 0) {
-      return; // target 'key' not exist
-    }
-
-    list[index].isDeleted = true;
-
-    await synchronized();
-  }
-
-  Future<void> deleteHard(String key) async {
-    int index = _getIndex(key);
-    if (index < 0) {
-      return; // target 'key' not exist
-    }
-
-    list.removeAt(index);
-
-    await synchronized();
-  }
-
-  Future<void> synchronized() async {
-    await write(list);
-    notifyListeners();
-  }
-
-  Result<TOTPKey> isValidKeyIns(TOTPKey keyIns) {
+  Result<TOTPKey> isValidKeyIns(TOTPKey keyIns, [bool skipSameItem = false]) {
     var res = normalize(keyIns.key);
     switch (res) {
       case Success():
@@ -144,9 +130,14 @@ class TOTPKeyList extends ChangeNotifier {
         return Failure(err: res.err);
     }
 
-    int index = _getIndex(keyIns.key);
-    if (index >= 0) {
-      return Failure(err: "key:'${keyIns.key}'已存在");
+    for (var i = 0; i < list.length; i++) {
+      if (keyIns.key == list[i].key) {
+        if (skipSameItem) {
+          skipSameItem = false;
+        } else {
+          return Failure(err: "Duplicate key: ${list[i].key}");
+        }
+      }
     }
 
     return Success(data: keyIns);
@@ -170,29 +161,40 @@ class TOTPKeyList extends ChangeNotifier {
   }
 }
 
-Future<void> write(List<TOTPKey> list) async {
-  File fileIns = await _openFile();
-  await fileIns.writeAsString(jsonEncode(list));
+Future<Result<void>> write(List<TOTPKey> list) async {
+  Uint8List fileBytes = utf8.encode(jsonEncode(list));
+  Result<Uint8List> res = await AndroidKeyStore.encrypt(fileBytes);
+  switch (res) {
+    case Success():
+      File fileIns = await _openFile();
+      await fileIns.writeAsBytes(res.data);
+      return Success(data: null);
+    case Failure():
+      return res;
+  }
 }
 
 Future<File> _openFile() async {
   final directory = await getApplicationDocumentsDirectory();
-  final path = directory.path;
+  final file = File("${directory.path}/totp_key.txt");
 
-  final dir = Directory(path);
-  if (!await dir.exists()) {
-    await dir.create(recursive: true);
+  if (!await file.exists()) {
+    await file.create(recursive: true);
   }
 
-  return File("$path/totp_key.json");
+  return file;
 }
 
-Future<String> _backupFile() async {
-  File f = await _openFile();
-  int timestamp = DateTime.now().millisecondsSinceEpoch;
+Future<void> _backupFile() async {
+  final directory = await getApplicationDocumentsDirectory();
+  final file = File("${directory.path}/totp_key.txt");
 
-  String newFileName = "${f.path}/totp_key_$timestamp.json";
-  await f.copy(newFileName);
+  if (!await file.exists()) {
+    return;
+  }
 
-  return newFileName;
+  final now = DateTime.now().millisecondsSinceEpoch;
+  final newFileName = "${directory.path}/totp_key.txt.$now";
+
+  await file.rename(newFileName);
 }

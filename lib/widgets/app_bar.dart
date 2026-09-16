@@ -1,25 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:totp/pages/about.dart';
-import 'package:totp/widgets/transition_builder.dart';
+import 'package:totp/widgets/new_page.dart';
 
 AppBar homepageAppBar(BuildContext context) {
+  final theme = Theme.of(context);
+
   return AppBar(
-    backgroundColor: Theme.of(context).colorScheme.onSurface,
     leading: SizedBox.shrink(),
-    title: Center(
-      child: Text("TOTP", style: Theme.of(context).textTheme.titleLarge),
-    ),
+    title: Center(child: Text("TOTP", style: theme.textTheme.headlineLarge)),
     actions: [_ToAboutIcon()],
   );
 }
 
 AppBar subpageAppBar(BuildContext context, String title) {
+  final theme = Theme.of(context);
+
   return AppBar(
-    backgroundColor: Theme.of(context).colorScheme.onSurface,
-    leading: BackButton(color: Theme.of(context).colorScheme.primary),
-    title: Center(
-      child: Text(title, style: Theme.of(context).textTheme.titleLarge),
-    ),
+    leading: BackButton(color: theme.colorScheme.primary),
+    title: Center(child: Text(title, style: theme.textTheme.headlineLarge)),
     actions: [SizedBox(width: 56)], // default leading width is 56
   );
 }
@@ -28,15 +26,9 @@ class _ToAboutIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconTheme(
-      data: IconThemeData(size: 32),
+      data: IconThemeData(size: 28),
       child: IconButton(
-        onPressed: () => Navigator.of(context).push(
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) =>
-                const AboutPage(),
-            transitionsBuilder: transition,
-          ),
-        ),
+        onPressed: newPage(context, const AboutPage()),
         icon: Icon(Icons.apps),
       ),
     );

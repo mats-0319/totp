@@ -1,5 +1,5 @@
 name: totp
-description: "一个符合RFC 6238标准的TOTP Code计算应用"
+description: "一个符合RFC 6238标准的计算TOTP Code的android应用"
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 version: 1.0.0+1
@@ -30,8 +30,8 @@ dev_dependencies:
 flutter:
   assets:
     - assets/logo_256.png
-    - assets/manual.md
-    - assets/tech.md
-    - assets/totp_design.png
+    - doc/manual.md
+    - doc/tech.md
+    - doc/totp_design.png
 
   uses-material-design: true # 将Icons打包进app
