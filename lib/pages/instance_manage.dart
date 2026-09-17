@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:totp/dart/result.dart';
-import 'package:totp/model/export.dart';
+import 'package:totp/model/file_operate.dart';
 import 'package:totp/model/totp_key.dart';
 import 'package:totp/model/totp_key_list.dart';
 import 'package:totp/widgets/app_bar.dart';
@@ -90,7 +90,7 @@ Widget _functionBar(BuildContext context) {
         ElevatedButton(
           onPressed: () async {
             var res = await import(TOTPKeyList());
-            if (context.mounted && res is Failure && res.err.isNotEmpty) {
+            if (context.mounted && res is Failure) {
               showDialog(
                 context: context,
                 builder: (context) => AlertDialog(content: Text(res.err)),

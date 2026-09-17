@@ -37,6 +37,7 @@ Tools • Dart 3.13.2 • DevTools 2.60.0
 - `flutter clean`
 - `flutter pub get` 下载依赖
 - `flutter run -v`
+- `flutter test`
 - `flutter build apk --split-per-abi` 打包
 - `flutter install --use-application-binary=build/app/outputs/flutter-apk/app-arm64-v8a-release.apk`
     - 这里要具体指到对应架构的包，不然flutter会安装成示例代码；或者打包时不区分架构也行

@@ -3,10 +3,10 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:totp/dart/kotlin_keystore.dart';
 import 'package:totp/dart/result.dart';
 import 'package:totp/dart/totp.dart';
+import 'package:totp/model/file_operate.dart';
 import 'package:totp/model/totp_key.dart';
 
 class TOTPKeyList extends ChangeNotifier {
@@ -26,7 +26,7 @@ class TOTPKeyList extends ChangeNotifier {
     err = "";
 
     try {
-      File fileIns = await _openFile();
+      File fileIns = await openFile("totp_key.txt");
       Uint8List fileBytes = await fileIns.readAsBytes();
 
       List<TOTPKey> l = [];
@@ -36,7 +36,7 @@ class TOTPKeyList extends ChangeNotifier {
           case Success():
             fileBytes = res.data;
           case Failure():
-            await _backupFile();
+            await backupFile();
             throw res.err;
         }
         for (var value in jsonDecode(utf8.decode(fileBytes))) {
@@ -166,35 +166,10 @@ Future<Result<void>> write(List<TOTPKey> list) async {
   Result<Uint8List> res = await AndroidKeyStore.encrypt(fileBytes);
   switch (res) {
     case Success():
-      File fileIns = await _openFile();
+      File fileIns = await openFile("totp_key.txt");
       await fileIns.writeAsBytes(res.data);
       return Success(data: null);
     case Failure():
       return res;
   }
-}
-
-Future<File> _openFile() async {
-  final directory = await getApplicationDocumentsDirectory();
-  final file = File("${directory.path}/totp_key.txt");
-
-  if (!await file.exists()) {
-    await file.create(recursive: true);
-  }
-
-  return file;
-}
-
-Future<void> _backupFile() async {
-  final directory = await getApplicationDocumentsDirectory();
-  final file = File("${directory.path}/totp_key.txt");
-
-  if (!await file.exists()) {
-    return;
-  }
-
-  final now = DateTime.now().millisecondsSinceEpoch;
-  final newFileName = "${directory.path}/totp_key.txt.$now";
-
-  await file.rename(newFileName);
 }
